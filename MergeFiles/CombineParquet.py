@@ -1,8 +1,8 @@
 import os
-import dask.dataframe as dd
 import pandas as pd
-import logging
+import dask.dataframe as dd
 from dask.distributed import Client, LocalCluster
+import logging
 from dask import delayed
 
 # Setup logging
@@ -10,68 +10,47 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_parquet_file(file):
-    try:
-        # Read each file as a delayed Dask DataFrame
-        df = dd.read_parquet(file, engine='pyarrow')
-        part_number = os.path.basename(file).split('.')[0]
-        df['Part Number'] = part_number
-        return df
-    except Exception as e:
-        logging.error(f'Error reading file {file}: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=32)
+    # This function reads a single Parquet file and returns a DataFrame.
+    df = pd.read_parquet(file)
+    df['Part Number'] = os.path.splitext(os.path.basename(file))[0]  # Assuming part number is the file name without extension
+    return df
 
 def read_parquet_directory(directory):
-    logging.info(f"Reading parquet files from directory: {directory}")
-    try:
-        files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
-        # Process each file in parallel using Dask
-        dataframes = [delayed(read_parquet_file)(file) for file in files]
-        ddf = dd.from_delayed(dataframes)
-        return ddf
-    except Exception as e:
-        logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=32)
+    # List all Parquet files in the directory
+    files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
+    # Create delayed tasks for each file
+    delayed_frames = [delayed(read_parquet_file)(file) for file in files]
+
+    # Define explicit metadata for the DataFrame expected from read_parquet_file
+    meta = {'t': float, 'x': float, 'y': float, 'z': float, 'pyro1': float, 'pyro2': float,
+            'laser_state': float, 'defect': float, 'hatch': float, 'mp_width': float,
+            'mp_length': float, 'mp_intensity': float, 'layer': int, 't_hatch': float,
+            'v': float, 'hatch_length': float, 'hatch_angle': float,
+            'instantaneous_distance': float, 'Part Number': str}
+
+    # Use from_delayed to construct a Dask DataFrame
+    ddf = dd.from_delayed(delayed_frames, meta=meta)
+    return ddf
 
 def attach_parameters(ddf, parameters_file):
-    try:
-        parameters = pd.read_excel(parameters_file)
-        parameters['Part Number'] = parameters['Part Number'].astype(str)
-        parameters_ddf = dd.from_pandas(parameters, npartitions=1)
-        ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
-        return ddf
-    except Exception as e:
-        logging.error(f'Failed to attach parameters: {e}', exc_info=True)
-        return ddf
-
-def calculate_NVED(ddf):
-    try:
-        A = 0.3
-        l = 7.5
-        rho = 8.395e-3
-        Cp = 0.43
-        Tm = 1300
-        T0 = 300
-        h = 75
-
-        ddf['E*'] = (A * ddf['Power (W)'] / (2 * ddf['Speed (mm/s)'] * l * ddf['beam_radius'] * 1e3) *
-                     1 / (0.67 * rho * Cp * (Tm - T0)))
-        ddf['1/h*'] = ddf['beam_radius'] * 1e3 / h
-        return ddf
-    except Exception as e:
-        logging.error(f'Failed to calculate NVED: {e}', exc_info=True)
-        return ddf
+    parameters = pd.read_excel(parameters_file)
+    parameters['Part Number'] = parameters['Part Number'].astype(str)  # Ensure matching data types for merging
+    parameters_ddf = dd.from_pandas(parameters, npartitions=32)
+    ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
+    return ddf
 
 def main():
-    cluster = LocalCluster(memory_limit='2GB', n_workers=4, threads_per_worker=1)
+    cluster = LocalCluster(
+        memory_limit='64GB',
+        n_workers=32,
+        threads_per_worker=1
+    )
     client = Client(cluster)
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
-
         ddf = read_parquet_directory(directory)
-        ddf = attach_parameters(ddf, 'part_parameters.xlsx')
-        ddf = calculate_NVED(ddf)
-
+        ddf = attach_parameters(ddf, 'parameters.xlsx')
         df = ddf.compute()
 
         if df.empty:
