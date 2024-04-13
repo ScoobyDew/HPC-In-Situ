@@ -91,7 +91,7 @@ def main():
         logging.info(f"Processing data in directory: {directory}")
 
         # Utilize multiprocessing to handle multiple files
-        combined_df = combine_on_name(directory, num_processes=16)
+        combined_df = combine_on_name(directory, num_processes=2)
 
         if combined_df.empty:
             logging.error("Combined DataFrame is empty. No data to process.")
