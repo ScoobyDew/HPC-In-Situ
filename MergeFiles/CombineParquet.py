@@ -86,4 +86,4 @@ if __name__ == "__main__":
             print(file)
             df = pd.read_parquet(dir + file)
             print(df.head())
-            break
+
