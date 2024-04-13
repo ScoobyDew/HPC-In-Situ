@@ -1,9 +1,7 @@
 import os
 import pandas as pd
-import dask.dataframe as dd
-from dask.distributed import Client, LocalCluster
 import logging
-from dask import delayed
+from multiprocessing import Pool
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -21,37 +19,26 @@ def read_parquet_file(file):
 
 def read_parquet_directory(directory):
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
-    delayed_frames = [delayed(read_parquet_file)(file) for file in files]
-    meta = pd.read_parquet(files[0]).dtypes.to_dict() if files else {}
-    if 'Part Number' not in meta:
-        meta['Part Number'] = str
-    ddf = dd.from_delayed(delayed_frames, meta=meta)
-    return ddf
+    with Pool(32) as p:  # Utilizing 32 cores
+        dataframes = p.map(read_parquet_file, files)
+    return pd.concat(dataframes, ignore_index=True)
 
-def attach_parameters(ddf, parameters_file):
+def attach_parameters(df, parameters_file):
     try:
         parameters = pd.read_excel(parameters_file)
         parameters['Part Number'] = parameters['Part Number'].astype(str)
-        parameters_ddf = dd.from_pandas(parameters, npartitions=32)
-        ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
-        return ddf
+        df = df.merge(parameters, on='Part Number', how='left')
+        return df
     except Exception as e:
         logging.error(f"Error merging parameters: {str(e)}")
-        return ddf  # Proceed with original data in case of error
+        return df  # Proceed with original data in case of error
 
 def main():
-    cluster = LocalCluster(
-        memory_limit='8GB',
-        n_workers=32,
-        threads_per_worker=1
-    )
-    client = Client(cluster)
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
-        ddf = read_parquet_directory(directory)
-        ddf = attach_parameters(ddf, 'part_parameters.xlsx')
-        df = ddf.compute()
+        df = read_parquet_directory(directory)
+        df = attach_parameters(df, 'part_parameters.xlsx')
         if df.empty:
             logging.error("Processed DataFrame is empty. No data to process.")
         else:
@@ -60,8 +47,6 @@ def main():
             print(df.describe())
     except Exception as e:
         logging.error(f"An error occurred during processing: {str(e)}")
-    finally:
-        client.close()
 
 if __name__ == "__main__":
     main()
