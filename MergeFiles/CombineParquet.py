@@ -1,6 +1,6 @@
 import os
-import dask_cudf
-import cudf
+import dask.dataframe as dd
+import pandas as pd
 import logging
 from dask.distributed import Client
 
@@ -8,32 +8,30 @@ from dask.distributed import Client
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-
 def read_parquet_directory(directory):
     logging.info(f"Reading parquet files from directory: {directory}")
     try:
-        # Using dask_cudf to read parquet files in parallel
-        ddf = dask_cudf.read_parquet(os.path.join(directory, '*.parquet'))
+        # Using Dask DataFrame to read parquet files in parallel
+        ddf = dd.read_parquet(os.path.join(directory, '*.parquet'))
         return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dask_cudf.from_cudf(cudf.DataFrame(), npartitions=1)  # Return an empty dask_cudf DataFrame
-
+        return dd.from_pandas(pd.DataFrame(), npartitions=1)  # Return an empty Dask DataFrame
 
 def attach_parameters(ddf, parameters_file):
     try:
-        parameters = cudf.read_excel(parameters_file)
+        parameters = pd.read_excel(parameters_file)
         features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
-        parameters = parameters[necessary_columns]
+        parameters = pd.DataFrame(parameters, columns=necessary_columns)
 
-        # Merging using dask_cudf merge function
-        ddf = ddf.merge(parameters, on='Part Number', how='left')
+        # Convert parameters to Dask DataFrame and merge
+        parameters_ddf = dd.from_pandas(parameters, npartitions=1)
+        ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
         return ddf
     except Exception as e:
         logging.error(f'Failed to attach parameters: {e}', exc_info=True)
         return ddf  # Return the input if failure occurs
-
 
 def calculate_NVED(ddf):
     try:
@@ -52,7 +50,6 @@ def calculate_NVED(ddf):
     except Exception as e:
         logging.error(f'Failed to calculate NVED: {e}', exc_info=True)
         return ddf
-
 
 def main():
     client = Client()  # Starts a Dask client to manage workers
@@ -79,7 +76,6 @@ def main():
         logging.error(f'An error occurred during processing: {e}', exc_info=True)
     finally:
         client.close()
-
 
 if __name__ == "__main__":
     main()
