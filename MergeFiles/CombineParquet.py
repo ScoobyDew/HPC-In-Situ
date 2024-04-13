@@ -86,7 +86,7 @@ def main():
 
         # Utilize multiprocessing to handle multiple files
         combined_df = combine_on_name(directory,
-                                      num_processes=8)  # Adjust the number of processes based on your HPC's CPU cores
+                                      num_processes=16)  # Adjust the number of processes based on your HPC's CPU cores
         combined_df = attach_parameters(combined_df)
         combined_df[['mp_width', 'mp_length', 'mp_intensity']] = combined_df[
             ['mp_width', 'mp_length', 'mp_intensity']].replace(0, np.nan)
