@@ -32,7 +32,7 @@ def attach_parameters(ddf, parameters_file):
     try:
         parameters = pd.read_excel(parameters_file)
         parameters['Part Number'] = parameters['Part Number'].astype(str)
-        parameters_ddf = dd.from_pandas(parameters, npartitions=1)
+        parameters_ddf = dd.from_pandas(parameters, npartitions=32)
         ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
         return ddf
     except Exception as e:
@@ -40,7 +40,11 @@ def attach_parameters(ddf, parameters_file):
         return ddf  # Proceed with original data in case of error
 
 def main():
-    cluster = LocalCluster(memory_limit='2GB', n_workers=4, threads_per_worker=1)
+    cluster = LocalCluster(
+        memory_limit='64GB',
+        n_workers=32,
+        threads_per_worker=1
+    )
     client = Client(cluster)
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
