@@ -1,0 +1,10 @@
+2024-04-13 15:34:56,807 - INFO - Processing data in directory: /mnt/parscratch/users/eia19od/Cleaned
+2024-04-13 15:34:56,807 - ERROR - An error occurred during processing: [WinError 3] The system cannot find the path specified: '/mnt/parscratch/users/eia19od/Cleaned'
+Traceback (most recent call last):
+  File "C:\Users\Oliver\PycharmProjects\HPC_In_Situ\MergeFiles\CombineParquet.py", line 93, in main
+    combined_df = combine_on_name(directory, num_processes=16)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Oliver\PycharmProjects\HPC_In_Situ\MergeFiles\CombineParquet.py", line 31, in combine_on_name
+    filepaths = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(".parquet")]
+                                                           ^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [WinError 3] The system cannot find the path specified: '/mnt/parscratch/users/eia19od/Cleaned'
