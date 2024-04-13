@@ -87,6 +87,7 @@ def calculate_normalized_enthalpy(df):
 def main():
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
+        print("directory being scanned:", directory)
         logging.info(f"Processing data in directory: {directory}")
 
         # Utilize multiprocessing to handle multiple files
