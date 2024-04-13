@@ -94,7 +94,7 @@ def main():
 
         if combined_df.empty:
             logging.error("Combined DataFrame is empty. No data to process.")
-            return
+            return combined_df  # Ensure returning a DataFrame even when empty
 
         combined_df = attach_parameters(combined_df)
         combined_df[['mp_width', 'mp_length', 'mp_intensity']] = combined_df[
@@ -104,14 +104,14 @@ def main():
         logging.info('Processing completed successfully')
     except Exception as e:
         logging.error(f'An error occurred during processing: {e}', exc_info=True)
-        return pd.DataFrame()  # Return empty DataFrame in case of failure
+        return pd.DataFrame()  # Return an empty DataFrame on exception
 
     return combined_df
 
 
 if __name__ == "__main__":
     df = main()
-    if not df.empty:
+    if df is not None and not df.empty:
         print(df.columns)
         print(df.head())
         print(df.describe())
