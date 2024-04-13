@@ -78,7 +78,12 @@ def main():
 
 if __name__ == "__main__":
     # open and print 100.parquet
-    filepath = '/mnt/parscratch/users/eia19od/Cleaned/100.parquet'
-    df = pd.read_parquet(filepath)
-    print(df.head())
-    print(df.describe())
+    dir = '/mnt/parscratch/users/eia19od/Cleaned/'
+
+    # try and open all parquet files in the directory
+    for file in os.listdir(dir):
+        if file.endswith(".parquet"):
+            print(file)
+            df = pd.read_parquet(dir + file)
+            print(df.head())
+            break
