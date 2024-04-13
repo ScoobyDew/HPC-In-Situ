@@ -13,7 +13,6 @@
 module load Python/3.10.8-GCCcore-12.2.0
 export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 
-pip install dask[dataframe]  # Install only the necessary Dask components
 pip install pandas
 pip install numpy
 pip install fastparquet
