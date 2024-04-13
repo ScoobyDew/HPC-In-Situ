@@ -6,7 +6,7 @@
 #SBATCH --ntasks-per-node=1        # Number of cores
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=80G                  # Total memory per node
-#SBATCH --time=01:00:00             # Time limit hrs:min:sec
+#SBATCH --time=06:00:00             # Time limit hrs:min:sec
 #SBATCH --output=result_%j.log      # Standard output and error log
 #SBATCH --error=error_%j.log        # Error log
 #SBATCH --mail-user=odew1@sheffield.ac.uk
