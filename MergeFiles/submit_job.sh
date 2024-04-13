@@ -9,7 +9,7 @@ SBATCH --output=result_%j.log      # Standard output and error log
 SBATCH --error=error_%j.log        # Error log
 SBATCH --mail-eia19od=odew1@sheffield.ac.uk
 
-module load python3                 # Load Python module, adjust as needed based on your HPC environment
+module load Python/3.10.8-GCCcore-12.2.0
 export DATA_DIRECTORY=/users/eia19od/in_situ/HPC-In-Situ/MergeFiles
 
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/CombineParquet.py      # Adjust the path to your Python script
