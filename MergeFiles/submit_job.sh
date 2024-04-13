@@ -16,6 +16,7 @@ export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 pip install pandas
 pip install numpy
 pip install fastparquet
+pip install openpyxl
 
 # start time of the job
 date  # Print the current date and time
