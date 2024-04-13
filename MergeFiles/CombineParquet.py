@@ -16,7 +16,7 @@ def read_parquet_directory(directory):
         return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=1)  # Return an empty Dask DataFrame
+        return dd.from_pandas(pd.DataFrame(), npartitions=32)  # Return an empty Dask DataFrame
 
 def attach_parameters(ddf, parameters_file):
     try:
@@ -26,7 +26,7 @@ def attach_parameters(ddf, parameters_file):
         parameters = pd.DataFrame(parameters, columns=necessary_columns)
 
         # Convert parameters to Dask DataFrame and merge
-        parameters_ddf = dd.from_pandas(parameters, npartitions=1)
+        parameters_ddf = dd.from_pandas(parameters, npartitions=32)
         ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
         return ddf
     except Exception as e:
