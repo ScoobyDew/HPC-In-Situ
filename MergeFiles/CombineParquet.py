@@ -42,15 +42,14 @@ def attach_parameters(ddf, parameters_file):
 def main():
     cluster = LocalCluster(
         memory_limit='64GB',
-        n_workers=32,
-        threads_per_worker=1
-    )
+        n_workers=42,
+        threads_per_worker=1)
     client = Client(cluster)
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
         ddf = read_parquet_directory(directory)
-        ddf = attach_parameters(ddf, 'part_parameters.xlsx')
+        ddf = attach_parameters(ddf, 'parameters.xlsx')
         df = ddf.compute()
 
         if df.empty:
