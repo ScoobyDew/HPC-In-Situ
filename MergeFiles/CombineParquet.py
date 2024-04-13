@@ -41,7 +41,7 @@ def attach_parameters(ddf, parameters_file):
 
 def main():
     cluster = LocalCluster(
-        memory_limit='64GB',
+        memory_limit='16GB',
         n_workers=32,
         threads_per_worker=1
     )
