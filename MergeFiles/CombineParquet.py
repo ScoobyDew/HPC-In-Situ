@@ -11,10 +11,13 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 
 
 def read_parquet_file(filepath):
+    logging.info(f"Trying to read file: {filepath}")
     try:
         sample_number = int(os.path.basename(filepath).split('.')[0])
         df = pd.read_parquet(filepath)
         df['sample_number'] = sample_number
+        if df.empty:
+            logging.warning(f"Read empty DataFrame from {filepath}")
         return df
     except Exception as e:
         logging.error(f'Error reading {filepath}: {e}', exc_info=True)
@@ -26,6 +29,7 @@ def combine_on_name(directory, num_processes=4):
     Combine all .parquet files in a directory into a single DataFrame using multiprocessing.
     """
     filepaths = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(".parquet")]
+    logging.info(f"Found {len(filepaths)} .parquet files.")
 
     with Pool(processes=num_processes) as pool:
         dataframes = pool.map(read_parquet_file, filepaths)
@@ -37,7 +41,7 @@ def combine_on_name(directory, num_processes=4):
         combined_df = pd.concat(dataframes)
     else:
         logging.error('No dataframes to combine, returning empty DataFrame')
-        combined_df = pd.DataFrame()
+        return pd.DataFrame()
 
     return combined_df
 
@@ -83,10 +87,15 @@ def calculate_normalized_enthalpy(df):
 def main():
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
+        logging.info(f"Processing data in directory: {directory}")
 
         # Utilize multiprocessing to handle multiple files
-        combined_df = combine_on_name(directory,
-                                      num_processes=16)  # Adjust the number of processes based on your HPC's CPU cores
+        combined_df = combine_on_name(directory, num_processes=16)
+
+        if combined_df.empty:
+            logging.error("Combined DataFrame is empty. No data to process.")
+            return
+
         combined_df = attach_parameters(combined_df)
         combined_df[['mp_width', 'mp_length', 'mp_intensity']] = combined_df[
             ['mp_width', 'mp_length', 'mp_intensity']].replace(0, np.nan)
@@ -102,7 +111,10 @@ def main():
 
 if __name__ == "__main__":
     df = main()
-    print(df.columns)
-    print(df.head())
-    print(df.describe())
-    print(df.info())
+    if not df.empty:
+        print(df.columns)
+        print(df.head())
+        print(df.describe())
+        print(df.info())
+    else:
+        print("No data to display.")
