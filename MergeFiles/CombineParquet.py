@@ -2,7 +2,7 @@ import os
 import dask.dataframe as dd
 import pandas as pd
 import logging
-from dask.distributed import Client
+from dask.distributed import Client, LocalCluster
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -15,15 +15,14 @@ def read_parquet_directory(directory):
         files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
         if not files:
             logging.info("No parquet files found.")
-            return dd.from_pandas(pd.DataFrame(), npartitions=1)
+            return dd.from_pandas(pd.DataFrame(), npartitions=32)
 
         # Read files using Dask
         ddf = dd.read_parquet(files, engine='pyarrow')
 
-        # Add 'Part Number' from filename using map_partitions
+        # Extract 'Part Number' from filenames
         ddf['Part Number'] = ddf.map_partitions(
-            lambda df, filename: df.assign(PartNumber=os.path.basename(filename).split('.')[0]),
-            filename=files,
+            lambda df: df.assign(PartNumber=df.apply(lambda x: os.path.splitext(os.path.basename(x.name))[0], axis=1)),
             meta=('Part Number', str)
         )
 
@@ -40,7 +39,11 @@ def attach_parameters(ddf, parameters_file):
         features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
         parameters_df = pd.DataFrame(parameters, columns=necessary_columns)
-        parameters_ddf = dd.from_pandas(parameters_df, npartitions=1)
+        parameters_ddf = dd.from_pandas(parameters_df, npartitions=32)
+
+        # Ensure data types match
+        ddf['Part Number'] = ddf['Part Number'].astype(str)
+        parameters_ddf['Part Number'] = parameters_ddf['Part Number'].astype(str)
 
         # Merge parameters with the main Dask DataFrame
         ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
@@ -60,7 +63,7 @@ def calculate_NVED(ddf):
         T0 = 300
         h = 75
 
-        # Calculation using Dask operations
+        # Perform calculations
         ddf['E*'] = (A * ddf['Power (W)'] / (2 * ddf['Speed (mm/s)'] * l * ddf['beam_radius'] * 1e3) *
                      1 / (0.67 * rho * Cp * (Tm - T0)))
         ddf['1/h*'] = ddf['beam_radius'] * 1e3 / h
@@ -71,17 +74,16 @@ def calculate_NVED(ddf):
 
 
 def main():
-    client = Client()  # Starts a Dask client to manage workers
+    cluster = LocalCluster()  # Adjust cluster settings for your environment
+    client = Client(cluster)
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
 
-        # Read and process data
         ddf = read_parquet_directory(directory)
         ddf = attach_parameters(ddf, 'part_parameters.xlsx')
         ddf = calculate_NVED(ddf)
 
-        # Compute the result to get final DataFrame
         df = ddf.compute()
 
         if df.empty:
