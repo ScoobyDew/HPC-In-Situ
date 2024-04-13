@@ -82,7 +82,7 @@ def calculate_normalized_enthalpy(df):
 
 def main():
     try:
-        directory = '/mnt/parscratch/users/eia19od/Cleaned'
+        directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
 
         # Utilize multiprocessing to handle multiple files
         combined_df = combine_on_name(directory,
