@@ -10,8 +10,7 @@
 #SBATCH --mail-user=odew1@sheffield.ac.uk
 
 module load Python/3.10.8-GCCcore-12.2.0
-export DATA_DIRECTORY=/users/eia19od/in_situ/HPC-In-Situ/MergeFiles
-
+export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 
 pip install numpy
 pip install pandas
