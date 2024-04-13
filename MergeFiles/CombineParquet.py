@@ -9,49 +9,52 @@ from multiprocessing import Pool
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-def combine_on_name(directory):
-    """
-    Combine all .parquet files in a directory into a single DataFrame.
-    The files are combined based on the 'name' column and only includes files
-    where the filename begins with an integer (sample number).
-    """
-    dfs = []
-    for file in os.listdir(directory):
-        if file.endswith(".parquet"):
-            try:
-                sample_number = int(file.split('.')[0])
-            except ValueError:
-                logging.warning(f'Skipped: {file} due to invalid sample number')
-                continue
 
-            filepath = os.path.join(directory, file)
-            try:
-                df = pd.read_parquet(filepath)
-                df['sample_number'] = sample_number
-                dfs.append(df)
-            except Exception as e:
-                logging.error(f'Failed to read {filepath}: {e}', exc_info=True)
+def read_parquet_file(filepath):
+    try:
+        sample_number = int(os.path.basename(filepath).split('.')[0])
+        df = pd.read_parquet(filepath)
+        df['sample_number'] = sample_number
+        return df
+    except Exception as e:
+        logging.error(f'Error reading {filepath}: {e}', exc_info=True)
+        return pd.DataFrame()  # Return an empty DataFrame in case of error
 
-    if dfs:
-        combined_df = pd.concat(dfs)
+
+def combine_on_name(directory, num_processes=4):
+    """
+    Combine all .parquet files in a directory into a single DataFrame using multiprocessing.
+    """
+    filepaths = [os.path.join(directory, file) for file in os.listdir(directory) if file.endswith(".parquet")]
+
+    with Pool(processes=num_processes) as pool:
+        dataframes = pool.map(read_parquet_file, filepaths)
+
+    # Filter out any empty DataFrames returned due to errors
+    dataframes = [df for df in dataframes if not df.empty]
+
+    if dataframes:
+        combined_df = pd.concat(dataframes)
     else:
         logging.error('No dataframes to combine, returning empty DataFrame')
         combined_df = pd.DataFrame()
 
     return combined_df
 
+
 def attach_parameters(df):
     try:
         parameters = pd.read_excel('parameters.xlsx')
-        features = ['Power (W)', 'Speed (mm/s)', 'Focus']
+        features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
         parameters = parameters[necessary_columns]
         df = df.merge(parameters, on='Part Number', how='left')
     except Exception as e:
-        logging.error('Failed to attach parameters: {e}', exc_info=True)
+        logging.error(f'Failed to attach parameters: {e}', exc_info=True)
     return df
 
-def calculatate_NVED(df):
+
+def calculate_NVED(df):
     A = 0.3
     l = 7.5
     rho = 8.395e-3
@@ -60,30 +63,35 @@ def calculatate_NVED(df):
     T0 = 300
     h = 75
 
-    df['E*'] = (A * df['Power (W)'] / (2 * df['Speed (mm/s)'] * l * df['beam_radius']) *
+    df['E*'] = (A * df['Power (W)'] / (2 * df['Speed (mm/s)'] * l * df['beam_radius'] * 1e3) *
                 1 / (0.67 * rho * Cp * (Tm - T0)))
-    df['1/h*'] = df['beam_radius'] / h
+    df['1/h*'] = df['beam_radius'] * 1e3 / h
     return df
 
-def calc_nomalised_enthalpy(df):
+
+def calculate_normalized_enthalpy(df):
     A = 0.3
     D = 3.25
     rho = 8.395e-3
     Cp = 0.43
     Tsol = 1300
-    df['dH/dh'] = (A * df['Power (W)']) / (rho * Cp * Tsol * np.sqrt(D * df['Speed (mm/s)'] * df['beam_radius']**3))
+    df['dH/dh'] = (A * df['Power (W)']) / (
+                rho * Cp * Tsol * np.sqrt(D * df['Speed (mm/s)'] * (df['beam_radius'] * 1e3) ** 3))
     return df
+
 
 def main():
     try:
         directory = '/users/eia19od/sample_files'
 
-        combined_df = combine_on_name(directory)
+        # Utilize multiprocessing to handle multiple files
+        combined_df = combine_on_name(directory,
+                                      num_processes=8)  # Adjust the number of processes based on your HPC's CPU cores
         combined_df = attach_parameters(combined_df)
-        combined_df[['mp_width', 'mp_length', 'mp_intensity']] =\
-            combined_df[['mp_width', 'mp_length', 'mp_intensity']].replace(0, np.nan)
-        combined_df = calculatate_NVED(combined_df)
-        combined_df = calc_nomalised_enthalpy(combined_df)
+        combined_df[['mp_width', 'mp_length', 'mp_intensity']] = combined_df[
+            ['mp_width', 'mp_length', 'mp_intensity']].replace(0, np.nan)
+        combined_df = calculate_NVED(combined_df)
+        combined_df = calculate_normalized_enthalpy(combined_df)
         logging.info('Processing completed successfully')
     except Exception as e:
         logging.error(f'An error occurred during processing: {e}', exc_info=True)
@@ -91,13 +99,10 @@ def main():
 
     return combined_df
 
+
 if __name__ == "__main__":
     df = main()
     print(df.columns)
-    print("")
     print(df.head())
-    print("")
     print(df.describe())
-    print("")
     print(df.info())
-    print("")
