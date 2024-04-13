@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
 #SBATCH --ntasks-per-node=1        # Number of cores
@@ -13,6 +14,7 @@
 module load Python/3.10.8-GCCcore-12.2.0
 export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 
+pip install dask[complete]
 pip install pandas
 pip install numpy
 pip install fastparquet
