@@ -88,5 +88,5 @@ def main():
         client.close()
 
 if __name__ == "__main__":
-    main()
+    # main()
     print("Done")
