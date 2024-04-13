@@ -2,6 +2,7 @@ import os
 import dask.dataframe as dd
 import logging
 from dask.distributed import Client
+import pandas as pd
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -23,7 +24,7 @@ def read_parquet_directory(directory):
         return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=1)  # Return an empty Dask DataFrame if an error occurs
+        return dd.from_pandas(pd.DataFrame(), npartitions=32)  # Return an empty Dask DataFrame if an error occurs
 
 def attach_parameters(ddf, parameters_file):
     try:
@@ -31,7 +32,7 @@ def attach_parameters(ddf, parameters_file):
         parameters = pd.read_excel(parameters_file)
         features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
-        parameters_ddf = dd.from_pandas(pd.DataFrame(parameters, columns=necessary_columns), npartitions=1)
+        parameters_ddf = dd.from_pandas(pd.DataFrame(parameters, columns=necessary_columns), npartitions=32)
 
         # Merge parameters with the main Dask DataFrame
         ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
