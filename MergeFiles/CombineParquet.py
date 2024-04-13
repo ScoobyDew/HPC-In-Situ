@@ -77,13 +77,5 @@ def main():
         logging.error(f'An error occurred during processing: {e}')
 
 if __name__ == "__main__":
-    # open and print 100.parquet
-    dir = '/mnt/parscratch/users/eia19od/Cleaned/'
-
-    # try and open all parquet files in the directory
-    for file in os.listdir(dir):
-        if file.endswith(".parquet"):
-            print(file)
-            df = pd.read_parquet(dir + file)
-            print(df.head())
+    main()
 
