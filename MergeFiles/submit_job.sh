@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=Parquet merging  # Job name
+#SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
 #SBATCH --ntasks-per-node=32        # Number of cores
 #SBATCH --mem=32G                   # Total memory per node
