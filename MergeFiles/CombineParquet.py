@@ -50,7 +50,7 @@ def main():
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
         ddf = read_parquet_directory(directory)
-        ddf = attach_parameters(ddf, 'parameters.xlsx')
+        ddf = attach_parameters(ddf, 'part_parameters.xlsx')
         df = ddf.compute()
 
         if df.empty:
