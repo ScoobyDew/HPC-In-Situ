@@ -1,6 +1,7 @@
 import os
-import pandas as pd
+import dask.dataframe as dd
 import logging
+from dask.distributed import Client
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -9,36 +10,37 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 def read_parquet_directory(directory):
     logging.info(f"Reading parquet files from directory: {directory}")
     try:
+        # List all parquet files in the directory
         files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
-        # Initialize an empty DataFrame
-        df = pd.DataFrame()
+        # Read files using Dask
+        ddf = dd.read_parquet(files, engine='pyarrow')
 
-        # Read each file as a DataFrame and concatenate it to the existing DataFrame
-        for file in files:
-            temp_df = pd.read_parquet(file)
-            df = pd.concat([df, temp_df], ignore_index=True)
-            logging.info(f"Processed file: {file}")
+        # Process file names to extract part numbers
+        meta = {'Part Number': str}
+        ddf['Part Number'] = ddf.map_partitions(lambda df: df.apply(lambda row: os.path.basename(row.name).split('.')[0], axis=1), meta=meta)
 
-        return df
+        logging.info(f"Files processed: {len(files)}")
+        return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return pd.DataFrame()  # Return an empty DataFrame if an error occurs
+        return dd.from_pandas(pd.DataFrame(), npartitions=1)  # Return an empty Dask DataFrame if an error occurs
 
-def attach_parameters(df, parameters_file):
+def attach_parameters(ddf, parameters_file):
     try:
+        # Parameters are still read with Pandas due to the usual smaller size and complexity of Excel files
         parameters = pd.read_excel(parameters_file)
         features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
-        parameters = pd.DataFrame(parameters, columns=necessary_columns)
+        parameters_ddf = dd.from_pandas(pd.DataFrame(parameters, columns=necessary_columns), npartitions=1)
 
-        # Merge parameters with the main data
-        df = df.merge(parameters, on='Part Number', how='left')
-        return df
+        # Merge parameters with the main Dask DataFrame
+        ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
+        return ddf
     except Exception as e:
         logging.error(f'Failed to attach parameters: {e}', exc_info=True)
-        return df  # Return the input if failure occurs
+        return ddf  # Return the input if failure occurs
 
-def calculate_NVED(df):
+def calculate_NVED(ddf):
     try:
         A = 0.3
         l = 7.5
@@ -48,23 +50,28 @@ def calculate_NVED(df):
         T0 = 300
         h = 75
 
-        df['E*'] = (A * df['Power (W)'] / (2 * df['Speed (mm/s)'] * l * df['beam_radius'] * 1e3) *
+        # Calculation using Dask operations
+        ddf['E*'] = (A * ddf['Power (W)'] / (2 * ddf['Speed (mm/s)'] * l * ddf['beam_radius'] * 1e3) *
                      1 / (0.67 * rho * Cp * (Tm - T0)))
-        df['1/h*'] = df['beam_radius'] * 1e3 / h
-        return df
+        ddf['1/h*'] = ddf['beam_radius'] * 1e3 / h
+        return ddf
     except Exception as e:
         logging.error(f'Failed to calculate NVED: {e}', exc_info=True)
-        return df
+        return ddf
 
 def main():
+    client = Client()  # Starts a Dask client to manage workers
     try:
         directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
         logging.info(f"Processing data in directory: {directory}")
 
         # Read and process data
-        df = read_parquet_directory(directory)
-        df = attach_parameters(df, 'part_parameters.xlsx')
-        df = calculate_NVED(df)
+        ddf = read_parquet_directory(directory)
+        ddf = attach_parameters(ddf, 'part_parameters.xlsx')
+        ddf = calculate_NVED(ddf)
+
+        # Compute the result to get final DataFrame
+        df = ddf.compute()
 
         if df.empty:
             logging.error("Processed DataFrame is empty. No data to process.")
@@ -75,7 +82,8 @@ def main():
 
     except Exception as e:
         logging.error(f'An error occurred during processing: {e}')
+    finally:
+        client.close()
 
 if __name__ == "__main__":
     main()
-
