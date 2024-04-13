@@ -63,7 +63,7 @@ def main():
 
         # Read and process data
         df = read_parquet_directory(directory)
-        df = attach_parameters(df, 'parameters.xlsx')
+        df = attach_parameters(df, 'part_parameters.xlsx')
         df = calculate_NVED(df)
 
         if df.empty:
