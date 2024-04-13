@@ -39,12 +39,17 @@ def main():
         logging.info(f"Processing data in directory: {directory}")
         df = read_parquet_directory(directory)
         df = attach_parameters(df, 'part_parameters.xlsx')
+
+        # Save the processed DataFrame to a new parquet file
+        output_file = '/users/eia19od/in_situ/HPC-In-Situ/MergeFiles'
+        df.to_parquet(output_file, index=False)
         if df.empty:
             logging.error("Processed DataFrame is empty. No data to process.")
         else:
             logging.info('Processing completed successfully')
             print(df.head())
             print(df.describe())
+
     except Exception as e:
         logging.error(f"An error occurred during processing: {str(e)}")
 

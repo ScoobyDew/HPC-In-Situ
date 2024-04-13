@@ -29,3 +29,19 @@ date  # Print the current date and time
 
 # Print out resource usage
 seff $SLURM_JOBID
+
+# Set your GitHub token as an environment variable
+export GITHUB_TOKEN="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"
+
+# Configure your Git username and email
+git config --global user.name "ScoobyDew"
+git config --global user.email "oliver.e.dew@gmail.com"
+
+# Add all new and changed files to the git
+git add .
+
+# Commit the changes
+git commit -m "Automated commit from script"
+
+# Push the changes to your remote repository
+git push https://$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@github.com//ScoobyDew/HPC-In-Situ.git
