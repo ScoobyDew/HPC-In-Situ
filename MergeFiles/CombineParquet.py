@@ -11,12 +11,22 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 def read_parquet_directory(directory):
     logging.info(f"Reading parquet files from directory: {directory}")
     try:
-        # Using Dask DataFrame to read parquet files in parallel
-        ddf = dd.read_parquet(os.path.join(directory, '*.parquet'))
+        # Get a list of all parquet files in the directory
+        files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
+
+        # Initialize an empty Dask DataFrame
+        ddf = dd.from_pandas(pd.DataFrame(), npartitions=32)
+
+        # Read each file as a Dask DataFrame and concatenate it to the existing DataFrame
+        for file in files:
+            temp_df = dd.read_parquet(file)
+            ddf = dd.concat([ddf, temp_df])
+            logging.info(f"Processed file: {file}")
+
         return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=32)  # Return an empty Dask DataFrame
+        return dd.from_pandas(pd.DataFrame(), npartitions=32)  # Return an empty Dask DataFrame if an error occurs
 
 def attach_parameters(ddf, parameters_file):
     try:
