@@ -1,45 +1,54 @@
 import os
 import dask.dataframe as dd
+import pandas as pd
 import logging
 from dask.distributed import Client
-import pandas as pd
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
 def read_parquet_directory(directory):
     logging.info(f"Reading parquet files from directory: {directory}")
     try:
-        # List all parquet files in the directory
         files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
+        if not files:
+            logging.info("No parquet files found.")
+            return dd.from_pandas(pd.DataFrame(), npartitions=1)
+
         # Read files using Dask
         ddf = dd.read_parquet(files, engine='pyarrow')
 
-        # Process file names to extract part numbers
-        meta = {'Part Number': str}
-        ddf['Part Number'] = ddf.map_partitions(lambda df: df.apply(lambda row: os.path.basename(row.name).split('.')[0], axis=1), meta=meta)
+        # Add 'Part Number' from filename using map_partitions
+        ddf['Part Number'] = ddf.map_partitions(
+            lambda df, filename: df.assign(PartNumber=os.path.basename(filename).split('.')[0]),
+            filename=files,
+            meta=('Part Number', str)
+        )
 
         logging.info(f"Files processed: {len(files)}")
         return ddf
     except Exception as e:
         logging.error(f'Error reading parquet files: {e}', exc_info=True)
-        return dd.from_pandas(pd.DataFrame(), npartitions=32)  # Return an empty Dask DataFrame if an error occurs
+        return dd.from_pandas(pd.DataFrame(), npartitions=1)
+
 
 def attach_parameters(ddf, parameters_file):
     try:
-        # Parameters are still read with Pandas due to the usual smaller size and complexity of Excel files
         parameters = pd.read_excel(parameters_file)
         features = ['Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
         necessary_columns = ['Part Number'] + features
-        parameters_ddf = dd.from_pandas(pd.DataFrame(parameters, columns=necessary_columns), npartitions=32)
+        parameters_df = pd.DataFrame(parameters, columns=necessary_columns)
+        parameters_ddf = dd.from_pandas(parameters_df, npartitions=1)
 
         # Merge parameters with the main Dask DataFrame
         ddf = ddf.merge(parameters_ddf, on='Part Number', how='left')
         return ddf
     except Exception as e:
         logging.error(f'Failed to attach parameters: {e}', exc_info=True)
-        return ddf  # Return the input if failure occurs
+        return ddf
+
 
 def calculate_NVED(ddf):
     try:
@@ -59,6 +68,7 @@ def calculate_NVED(ddf):
     except Exception as e:
         logging.error(f'Failed to calculate NVED: {e}', exc_info=True)
         return ddf
+
 
 def main():
     client = Client()  # Starts a Dask client to manage workers
@@ -85,6 +95,7 @@ def main():
         logging.error(f'An error occurred during processing: {e}')
     finally:
         client.close()
+
 
 if __name__ == "__main__":
     main()
