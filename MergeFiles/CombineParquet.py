@@ -77,4 +77,8 @@ def main():
         logging.error(f'An error occurred during processing: {e}')
 
 if __name__ == "__main__":
-    main()
+    # open and print 100.parquet
+    filepath = '/mnt/parscratch/users/eia19od/Cleaned/100.parquet'
+    df = pd.read_parquet(filepath)
+    print(df.head())
+    print(df.describe())
