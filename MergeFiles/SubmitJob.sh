@@ -21,4 +21,4 @@ date
 
 seff $SLURM_JOBID
 
-conda deactivate
+deactivate

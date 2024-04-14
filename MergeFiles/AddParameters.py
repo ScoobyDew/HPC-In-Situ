@@ -9,11 +9,11 @@ try:
     import cudf.pandas
     cudf.pandas.install()
     import pandas as pd
-    logging("Using cuDF")
+    logging.info("Using cuDF")
 
 except ImportError:
     import pandas as pd
-    logging("Using Pandas")
+    logging.info("Using Pandas")
     pass
 
 
