@@ -13,6 +13,7 @@
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 
+pip install pyarrow
 
 date  # Print the current date and time
 

@@ -1,4 +1,5 @@
 import pandas as pd
+import pyarrow
 import os
 import logging
 from multiprocessing import Pool
@@ -10,7 +11,7 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 
 def read_and_process_file(file):
     try:
-        df = pd.read_parquet(file)
+        df = pd.read_parquet(file, engine='pyarrow')
         if 'Part Number' not in df.columns:
             df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
         logging.info(f"Processed file: {os.path.splitext(os.path.basename(file))[0]}")
