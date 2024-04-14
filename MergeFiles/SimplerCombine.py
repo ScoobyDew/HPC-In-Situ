@@ -31,7 +31,7 @@ def main():
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
 
     # Number of processes
-    num_processes = 8
+    num_processes = 2
 
     # Split files into batches to control resource usage
     files_per_batch = len(files) // num_processes + (len(files) % num_processes > 0)
