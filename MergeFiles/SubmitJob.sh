@@ -12,6 +12,8 @@
 #SBATCH --output=result.log
 #SBATCH --error=error.log
 
+# Source the Conda initialization script
+source /opt/apps/testapps/common/software/staging/Anaconda3/2022.05/etc/profile.d/conda.sh
 
 conda activate conda_env
 
