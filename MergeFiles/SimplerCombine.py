@@ -27,7 +27,7 @@ def main():
     df = pd.concat(dataframes, ignore_index=True)
 
     # Save the processed DataFrame to a new parquet file
-    output_file = '/users/eia19od/in_situ/HPC-In-Situ/MergeFiles/combined.parquet'
+    output_file = '/mnt/parscratch/users/eia19od/combined.parquet'
     df.to_parquet(output_file, index=False)
 
 
