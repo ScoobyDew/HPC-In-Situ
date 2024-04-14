@@ -1,10 +1,19 @@
 import os
-import pandas as pd
 import logging
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+try:
+    import cudf.pandas
+    cudf.pandas.install()
+    import pandas as pd
+
+except ImportError:
+    import pandas as pd
+    pass
+
 
 def main():
     logging.info("Starting processing")
