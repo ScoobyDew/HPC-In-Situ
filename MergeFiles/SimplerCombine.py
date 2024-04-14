@@ -20,8 +20,8 @@ def main():
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
 
     # Use a multiprocessing Pool to read and process the files in parallel
-    with Pool(40) as p:
-        dataframes = p.map(read_and_process_file, files, chunksize=1000)
+    with Pool(6) as p:
+        dataframes = p.map(read_and_process_file, files, chunksize=1)
 
     # Combine all DataFrames into a single DataFrame
     df = pd.concat(dataframes, ignore_index=True)
