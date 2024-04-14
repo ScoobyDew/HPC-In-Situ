@@ -6,12 +6,16 @@ import logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 def read_and_process_file(file):
-    df = pd.read_parquet(file)
-    if 'Part Number' not in df.columns:
-        df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
-        # log the file name
-        logging.info(f"Processing file: {file}")
-        return df
+    try:
+        with pd.read_parquet(file) as df:
+            if 'Part Number' not in df.columns:
+                df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
+                # log the file name
+                logging.info(f"Processing file: {file}")
+            return df
+    except Exception as e:
+        logging.error(f"Error reading {file}: {str(e)}")
+        return pd.DataFrame()  # Return empty DataFrame in case of error
 
 def main():
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
