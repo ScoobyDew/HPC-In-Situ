@@ -33,6 +33,8 @@ def main():
     with Pool(2) as p:
         dataframes = p.map(read_and_process_file, files)
 
+    logging.info('Processing completed successfully')
+    logging.info('Concatenating DataFrames...')
     # Concatenate the resulting DataFrames
     combined_df = pd.concat(dataframes, ignore_index=True)
 
@@ -41,7 +43,7 @@ def main():
     combined_df.to_parquet(output_file, index=False)
 
     # Log completion message
-    logging.info('Processing completed successfully')
+    logging.info('Successfully saved combined data to parquet file')
 
 if __name__ == "__main__":
     main()
