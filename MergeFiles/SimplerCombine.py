@@ -21,7 +21,7 @@ def main():
 
     # Use a multiprocessing Pool to read and process the files in parallel
     with Pool(40) as p:
-        dataframes = p.map(read_and_process_file, files)
+        dataframes = p.map(read_and_process_file, files, chunksize=5)
 
     # Combine all DataFrames into a single DataFrame
     df = pd.concat(dataframes, ignore_index=True)
