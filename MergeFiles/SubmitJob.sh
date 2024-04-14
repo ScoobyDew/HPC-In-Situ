@@ -13,21 +13,9 @@
 #SBATCH --error=error.log
 
 # Source the Conda initialization script
-source /opt/apps/testapps/common/software/staging/Anaconda3/2022.05/etc/profile.d/conda.sh
+source venv/bin/activate
 module load CUDA/12.0.0
-conda activate conda_env
 
-# Install libmamba solver
-conda install -n base conda-libmamba-solver
-
-# Create the RAPIDS environment
-conda create --solver=libmamba -n rapids-24.04 -c rapidsai -c conda-forge -c nvidia  \
-    rapids=24.04 python=3.11 cuda-version=12.0
-
-# Activate the RAPIDS environment
-conda activate rapids-24.04
-
-date
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
 date
 
