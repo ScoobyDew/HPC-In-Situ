@@ -2,6 +2,8 @@
 
 ## Generic SLURM script for a serial job...
 
+# Delete any previous logs
+rm -f result.log error.log
 
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
@@ -16,7 +18,7 @@
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 pip install openpyxl
 date  # Print the current date and time
-python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
+python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/CheckMerge.py
 date  # Print the current date and time
 seff $SLURM_JOBID
 deactivate
