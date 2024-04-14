@@ -16,7 +16,7 @@
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 pip install openpyxl
 date  # Print the current date and time
-python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/CheckMerge.py
+python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
 date  # Print the current date and time
 seff $SLURM_JOBID
 deactivate
