@@ -1,9 +1,7 @@
 import pandas as pd
 import os
-from multiprocessing import Pool
 import logging
 import gc
-
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -26,15 +24,17 @@ def main():
 
     # Obtain a list of parquet files in the specified directory
     directory = os.getenv('DATA_DIRECTORY', '/mnt/parscratch/users/eia19od/Cleaned')
+    files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
 
-    # Over 4 cores, read the parquet files and append them to the combined DataFrame
-    with Pool(4) as p:
-        dataframes = p.map(read_and_process_file, [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')])
-        combined_df = pd.concat(dataframes, ignore_index=True)
+    # Read the parquet files one by one and append them to the combined DataFrame
+    for file in files:
+        df = read_and_process_file(file)
+        if not df.empty:
+            combined_df = pd.concat([combined_df, df], ignore_index=True)
+        gc.collect()  # Collect garbage to free memory
 
     # Save the combined DataFrame to a new parquet file
     output_file = '/mnt/parscratch/users/eia19od/combined_data.parquet'
-
     combined_df.to_parquet(output_file, index=False)
 
     # Log completion message
