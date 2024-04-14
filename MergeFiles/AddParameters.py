@@ -41,6 +41,8 @@ def main():
 
     '''Read excel part_parameters file'''
     parameters = pd.read_excel('part_parameters.xlsx')
+    logging.info("Read excel file")
+    logging.info(f"Parameters: {parameters.columns}")
     param_columns = [
         'Part Number',
         'Power (W)',
