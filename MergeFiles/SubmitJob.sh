@@ -1,32 +1,22 @@
 #!/bin/bash
 
-## Generic SLURM script for a serial job...
-
-# Delete any previous logs
-
-
-#SBATCH --job-name=Parquet_merging  # Job name
-
-#!/bin/bash
+#SBATCH --job-name=Parquet_merging
 #SBATCH --partition=gpu
 #SBATCH --qos=gpu
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
-#SBATCH --cpus-per-task=2      # Number of CPU cores per task
-#SBATCH --gres=gpu:2           # 2 GPUs for job
+#SBATCH --cpus-per-task=2
+#SBATCH --gres=gpu:2
+#SBATCH --mem=256G
+#SBATCH --time=00:20:00
+#SBATCH --output=result.log
+#SBATCH --error=error.log
 
+source /users/eia19od/in_situ/HPC-In-Situ/conda_env/bin/activate
 
-#SBATCH --mem=256G                  # Total memory per node
-#SBATCH --time=00:20:00             # Time limit hrs:min:sec
-#SBATCH --output=result.log         # Standard output and error log
-#SBATCH --error=error.log           # Error log
-
-
-source activate /users/eia19od/in_situ/HPC-In-Situ/conda_env
-
-date  # Print the current date and time
+date
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
-date  # Print the current date and time
+date
 
 seff $SLURM_JOBID
 

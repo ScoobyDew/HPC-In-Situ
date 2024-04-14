@@ -1,17 +1,6 @@
-"""
-Adds processing parameters to the combined Parquet file (See 'SimplerCombine.py').
-This is done by reading from part_parameters.xlsx and merging the data with the combined DataFrame on 'Part Number'.
-"""
-
 import os
-import cudf.pandas
-cudf.pandas.install()
-
 import pandas as pd
 import logging
-
-# use cudf for faster processing
-
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
