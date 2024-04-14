@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import logging
 from multiprocessing import Pool
+import gc
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -13,6 +14,8 @@ def read_and_process_file(file):
         if 'Part Number' not in df.columns:
             df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
         logging.info(f"Processed file: {file}")
+        gc.collect()
+
         return df
     except Exception as e:
         logging.error(f"Error processing {file}: {e}")
