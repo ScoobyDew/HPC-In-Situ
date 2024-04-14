@@ -19,6 +19,7 @@ def read_and_process_file(file):
 
     try:
         # Only read specified columns
+        gc.collect()
         df = pd.read_parquet(file, engine='pyarrow', columns=columns_to_read)
 
         # Convert columns to float32 if needed
@@ -61,6 +62,7 @@ def main():
     if combined_df is not None:
         # Save the combined DataFrame to a new parquet file
         output_file = '/mnt/parscratch/users/eia19od/combined_data.parquet'
+        gc.collect()
         combined_df.to_parquet(output_file, index=False)
         logging.info('Successfully saved combined data to parquet file')
 

@@ -13,12 +13,12 @@
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 
-pip install pyarrow
+
 
 date  # Print the current date and time
 
 # Run your Python script
-python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/SimplerCombine.py
+python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/CheckMerge.py
 
 # end time of the job
 date  # Print the current date and time
