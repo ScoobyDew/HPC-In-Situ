@@ -15,8 +15,8 @@
 #SBATCH --error=error.log           # Error log
 
 
-source /users/eia19od/in_situ/HPC-In-Situ/conda_env/bin/activate
-pip install openpyxl
+source activate /users/eia19od/in_situ/HPC-In-Situ/conda_env
+conda install openpyxl -y
 date  # Print the current date and time
 
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py

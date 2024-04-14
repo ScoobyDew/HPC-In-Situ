@@ -4,8 +4,14 @@ This is done by reading from part_parameters.xlsx and merging the data with the 
 """
 
 import os
+import cudf.pandas
+cudf.pandas.install()
+
 import pandas as pd
 import logging
+
+# use cudf for faster processing
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -18,6 +24,7 @@ def main():
         df = pd.read_parquet(filepath)
         df['Part Number'] = df['Part Number'].astype(int)
         logging.info(f"Read parquet file: {filepath}")
+
     except Exception as e:
         logging.error(f"Error reading {filepath}: {str(e)}")
         df = pd.DataFrame()
