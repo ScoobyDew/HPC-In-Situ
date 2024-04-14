@@ -25,7 +25,7 @@ except ImportError:
 
 
 def main():
-    freeze_support()
+    # freeze_support()
     logging.info("Starting processing")
     try: # Read the merged parquet file
         filepath = '/mnt/parscratch/users/eia19od/combined_data.parquet'
@@ -79,4 +79,5 @@ def main():
         logging.error(f"An error occurred during processing: {str(e)}")
 
 if __name__ == "__main__":
+    freeze_support()
     main()
