@@ -9,7 +9,7 @@ from multiprocessing import Pool
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-filepath = '/mnt/parscratch/users/eia19od/combined_data.parquet'
+filepath = '/mnt/parscratch/users/eia19od/combined_data_with_parameters.parquet'
 
 def main():
     # Read the merged parquet file
