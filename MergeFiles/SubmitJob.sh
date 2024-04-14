@@ -12,7 +12,7 @@
 #SBATCH --output=result.log
 #SBATCH --error=error.log
 
-source /users/eia19od/in_situ/HPC-In-Situ/conda_env/bin/activate
+source activate conda_env
 
 date
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
