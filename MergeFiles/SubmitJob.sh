@@ -16,6 +16,8 @@
 source /opt/apps/testapps/common/software/staging/Anaconda3/2022.05/etc/profile.d/conda.sh
 
 conda activate conda_env
+module load CUDA/12.0.0
+conda install -c conda-forge -c rapidsai -c nvidia -c defaults rapids=0.19 python=3.8 cudatoolkit=11.0
 
 date
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
