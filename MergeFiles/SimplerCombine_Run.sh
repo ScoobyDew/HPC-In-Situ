@@ -4,7 +4,7 @@
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
 #SBATCH --ntasks-per-node=1        # Number of cores
-#SBATCH --cpus-per-task=6
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=128G                  # Total memory per node
 #SBATCH --time=06:00:00             # Time limit hrs:min:sec
 #SBATCH --output=result.log      # Standard output and error log
