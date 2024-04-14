@@ -38,7 +38,8 @@ def main():
         logging.error(f"Error reading {parameters_file}: {str(e)}")
         parameters = pd.DataFrame()
 
-    try: # Merge the data
+    # Merge the data with the parameters
+    try:
         if not df.empty and not parameters.empty:
             df = df.merge(parameters, on='Part Number', how='left')
             logging.info("Merged parameters with data")
