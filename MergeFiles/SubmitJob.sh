@@ -3,7 +3,7 @@
 ## Generic SLURM script for a serial job...
 
 # Delete any previous logs
-rm -f result.log error.log
+
 
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
