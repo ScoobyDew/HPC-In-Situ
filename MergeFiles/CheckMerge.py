@@ -20,6 +20,37 @@ def main():
         logging.error(f"Error reading {filepath}: {str(e)}")
         df = pd.DataFrame()
 
+    # Convert pyro2 column to int8 and change to "Pyro"
+    try:
+        if 'pyro2' in df.columns:
+            df['pyro2'] = df['pyro2'].astype('int8')
+            df.rename(columns={'pyro2': 'Pyro'}, inplace=True)
+            logging.info("Converted pyro2 column to int8 and renamed to Pyro")
+        else:
+            logging.error("pyro2 column not found in DataFrame. No changes made.")
+    except Exception as e:
+        logging.error(f"An error occurred during column conversion: {str(e)}")
+
+    # Convert pyro and part number to int8
+    try:
+        if 'Pyro' in df.columns:
+            df['Pyro'] = df['Pyro'].astype('int8')
+            logging.info("Converted Pyro column to int8")
+        else:
+            logging.error("Pyro column not found in DataFrame. No changes made.")
+    except Exception as e:
+        logging.error(f"An error occurred during column conversion: {str(e)}")
+
+    try:
+        if 'Part Number' in df.columns:
+            df['Part Number'] = df['Part Number'].astype('int8')
+            logging.info("Converted Part Number column to int8")
+        else:
+            logging.error("Part Number column not found in DataFrame. No changes made.")
+    except Exception as e:
+        logging.error(f"An error occurred during column conversion: {str(e)}")
+
+
     # Check the columns of the merged DataFrame
     try:
         if not df.empty:
