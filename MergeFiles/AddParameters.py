@@ -39,6 +39,7 @@ def main():
             'Focus',
             'Beam radius (um)'
         ]
+        logging.info(f"Reading parameters file: {parameters_file}")
         parameters = pd.read_excel(parameters_file)
         parameters['Part Number'] = parameters['Part Number'].astype(int)
         logging.info(f"Read parameters file: {parameters_file}")
@@ -49,6 +50,7 @@ def main():
     # Merge the data with the parameters
     try:
         if not df.empty and not parameters.empty:
+            logging.info("Merging parameters with data")
             df = df.merge(parameters, on='Part Number', how='left')
             logging.info("Merged parameters with data")
         else:
