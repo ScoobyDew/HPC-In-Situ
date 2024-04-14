@@ -1,6 +1,10 @@
 import os
 import logging
+from multiprocessing import freeze_support
+
 import dask.dataframe as dd
+from dask.distributed import Client
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -21,6 +25,7 @@ except ImportError:
 
 
 def main():
+    freeze_support()
     logging.info("Starting processing")
     try: # Read the merged parquet file
         filepath = '/mnt/parscratch/users/eia19od/combined_data.parquet'

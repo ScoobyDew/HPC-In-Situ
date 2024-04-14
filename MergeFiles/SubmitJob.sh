@@ -17,9 +17,7 @@
 # Source the Conda initialization script
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 module load CUDA/12.0.0
-sacct -j jobid --format=JobID,MaxRSS
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
-sacct -j jobid --format=JobID,MaxRSS
 date
 
 seff $SLURM_JOBID
