@@ -20,14 +20,15 @@ def main():
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
 
     # Use a multiprocessing Pool to read and process the files in parallel
-    with Pool(6) as p:
-        dataframes = p.map(read_and_process_file, files, chunksize=1)
+    with Pool(8) as p:
+        dataframes = p.map(read_and_process_file, files)
 
     # Combine all DataFrames into a single DataFrame
     df = pd.concat(dataframes, ignore_index=True)
 
     # Save the processed DataFrame to a new parquet file
     output_file = '/mnt/parscratch/users/eia19od/combined.parquet'
+    print(f"Saving processed data to {output_file}")
     df.to_parquet(output_file, index=False)
 
 
