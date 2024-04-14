@@ -15,7 +15,7 @@
 #SBATCH --error=error.log           # Error log
 
 
-source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
+source /users/eia19od/in_situ/HPC-In-Situ/conda_env/bin/activate
 pip install openpyxl
 date  # Print the current date and time
 
