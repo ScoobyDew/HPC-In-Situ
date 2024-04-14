@@ -23,11 +23,11 @@
 
 
 source activate /users/eia19od/in_situ/HPC-In-Situ/conda_env
-conda install openpyxl -y
-date  # Print the current date and time
 
+date  # Print the current date and time
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
-
 date  # Print the current date and time
+
 seff $SLURM_JOBID
-deactivate
+
+conda deactivate
