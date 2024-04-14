@@ -12,7 +12,6 @@
 #SBATCH --output=result.log
 #SBATCH --error=error.log
 
-export PATH=/path/to/conda/bin:$PATH
 
 conda activate conda_env
 
