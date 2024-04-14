@@ -1,16 +1,19 @@
 import os
 import logging
+import dask.dataframe as dd
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 try:
-    import cudf.pandas
-    cudf.pandas.install()
-    import pandas as pd
-    logging.info("Using cuDF")
+    import cudf
+    from dask_cuda import LocalCUDACluster
+    from dask.distributed import Client
 
+    cluster = LocalCUDACluster()
+    client = Client(cluster)
+    logging.info("Using cuDF and Dask")
 except ImportError:
     import pandas as pd
     logging.info("Using Pandas")
@@ -21,7 +24,7 @@ def main():
     logging.info("Starting processing")
     try: # Read the merged parquet file
         filepath = '/mnt/parscratch/users/eia19od/combined_data.parquet'
-        df = pd.read_parquet(filepath)
+        df = dd.read_parquet(filepath)
         df['Part Number'] = df['Part Number'].astype(int)
         logging.info(f"Read parquet file: {filepath}")
 
