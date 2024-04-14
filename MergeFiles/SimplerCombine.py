@@ -10,7 +10,12 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 
 def read_and_process_file(file):
     # Define columns to read - adjust this list based on your actual data schema
-    columns_to_read = ['Part Number', 'AnotherColumn', 'YetAnotherColumn']
+    columns_to_read = [
+        'pyro2',
+        'mp_width',
+        'mp_length',
+        'mp_intensity'
+    ]
 
     try:
         # Only read specified columns
