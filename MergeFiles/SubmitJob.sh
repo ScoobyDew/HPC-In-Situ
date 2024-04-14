@@ -6,8 +6,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:4
-#SBATCH --mem=240G
+#SBATCH --gres=gpu:6
+#SBATCH --mem=180G
+#SBATCH --mem-per-cpu=16
 #SBATCH --time=00:30:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=odew1@sheffield.ac.uk
