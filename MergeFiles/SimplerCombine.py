@@ -3,7 +3,7 @@ import os
 from multiprocessing import Pool
 import logging
 
-logging.basicConfig(level=logging.INFO, filename='SimplerCombine.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 def read_and_process_file(file):
     df = pd.read_parquet(file)
