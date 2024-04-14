@@ -1,13 +1,17 @@
 import pandas as pd
 import os
 from multiprocessing import Pool
+import logging
 
+logging.basicConfig(level=logging.INFO, filename='SimplerCombine.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 def read_and_process_file(file):
     df = pd.read_parquet(file)
     if 'Part Number' not in df.columns:
         df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
-        print(f'Processing {file}')
-    return df
+        # log the file name
+        logging.info(f"Processing file: {file}")
+        return df
 
 def main():
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
