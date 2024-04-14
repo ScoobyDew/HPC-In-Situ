@@ -14,9 +14,11 @@
 module load Python/3.10.8-GCCcore-12.2.0
 export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 
+
 pip install pandas
 pip install numpy
 pip install fastparquet
+pip install dask[complete]
 
 # start time of the job
 date  # Print the current date and time
