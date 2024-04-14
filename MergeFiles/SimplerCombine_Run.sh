@@ -3,21 +3,17 @@
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
 #SBATCH --ntasks-per-node=1         # Number of cores
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=128G                  # Total memory per node
 #SBATCH --time=06:00:00             # Time limit hrs:min:sec
 #SBATCH --output=result.log         # Standard output and error log
 #SBATCH --error=error.log           # Error log
 #SBATCH --mail-user=odew1@sheffield.ac.uk
 
-# Load Python module if required by the environment, otherwise skip
-# module load Python/3.10.8-GCCcore-12.2.0
 
-# Activate the virtual environment
-source /users/eia19od/venv/bin/activate
+source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
 
 
-# start time of the job
 date  # Print the current date and time
 
 # Run your Python script
