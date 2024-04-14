@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
+    logging.info("Starting processing")
     try: # Read the merged parquet file
         filepath = '/mnt/parscratch/users/eia19od/combined_data.parquet'
         df = pd.read_parquet(filepath)
