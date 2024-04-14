@@ -55,7 +55,7 @@ def main():
         if df.empty:
             logging.error("Processed DataFrame is empty. No data to process.")
         else:
-            logging.info('Processing completed successfully')
+            logging.info('Processing completed with no errors')
             print(df.head())
             print(df.describe())
     except Exception as e:
