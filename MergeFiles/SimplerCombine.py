@@ -43,14 +43,19 @@ def main():
     # Initialize an empty DataFrame or use None for first concatenation
     combined_df = None
 
+    i=0
     # Process each file individually to reduce memory usage
     for file in files:
         df = read_and_process_file(file)
         if df is not None:
             if combined_df is None:
                 combined_df = df  # First DataFrame sets the combined_df
+                logging.info(f"1/{len(files)}")
+                i += 1
             else:
                 combined_df = pd.concat([combined_df, df], ignore_index=True)
+                logging.info(f"{i}/{len(files)}")
+                i += 1
             gc.collect()  # Optionally force garbage collection after each concat
 
     if combined_df is not None:
