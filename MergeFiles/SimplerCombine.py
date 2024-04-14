@@ -4,9 +4,7 @@ import os
 import logging
 
 
-# Setup a Dask client with explicit memory limits
-cluster = LocalCluster(memory_limit='16GB', n_workers=8)
-client = Client(cluster)
+
 
 
 # Set up logging
@@ -15,6 +13,11 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 
 
 def read_and_process_file(file):
+
+    # Setup a Dask client with explicit memory limits
+    cluster = LocalCluster(memory_limit='16GB', n_workers=8)
+    client = Client(cluster)
+
     try:
         # Use Dask to read the Parquet file
         ddf = dd.read_parquet(file)
@@ -53,5 +56,9 @@ def main():
 
 
 if __name__ == "__main__":
+    # Ensures this block only runs in main process
+    from multiprocessing import freeze_support
+
+    freeze_support()  # Good practice for cross-platform compatibility
     main()
-    logging.info("Done")
+    logging.info("Processing completed successfully")
