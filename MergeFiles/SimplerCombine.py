@@ -13,7 +13,7 @@ def read_and_process_file(file):
         df = pd.read_parquet(file)
         if 'Part Number' not in df.columns:
             df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
-        logging.info(f"Processed file: {file}")
+        logging.info(f"Processed file: {os.path.splitext(os.path.basename(file))[0]}")
         gc.collect()
 
         return df
