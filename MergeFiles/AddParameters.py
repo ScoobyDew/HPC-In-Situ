@@ -1,6 +1,6 @@
 import os
 import logging
-# import pandas as pd
+import pandas as pd
 import dask.dataframe as dd
 
 # Setup logging
@@ -40,7 +40,7 @@ def main():
 
 
     '''Read excel part_parameters file'''
-    parameters = dd.read_excel('part_parameters.xlsx')
+    parameters = pd.read_excel('part_parameters.xlsx')
     param_columns = [
         'Part Number',
         'Power (W)',
