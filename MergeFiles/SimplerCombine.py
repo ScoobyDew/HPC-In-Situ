@@ -6,6 +6,7 @@ def read_and_process_file(file):
     df = pd.read_parquet(file)
     if 'Part Number' not in df.columns:
         df['Part Number'] = os.path.splitext(os.path.basename(file))[0]
+        print(f'Processing {file}')
     return df
 
 def main():
@@ -15,7 +16,7 @@ def main():
     files = [os.path.join(directory, f) for f in os.listdir(directory) if f.endswith('.parquet')]
 
     # Use a multiprocessing Pool to read and process the files in parallel
-    with Pool(32) as p:
+    with Pool(40) as p:
         dataframes = p.map(read_and_process_file, files)
 
     # Combine all DataFrames into a single DataFrame
@@ -24,6 +25,8 @@ def main():
     # Save the processed DataFrame to a new parquet file
     output_file = '/users/eia19od/in_situ/HPC-In-Situ/MergeFiles/combined.parquet'
     df.to_parquet(output_file, index=False)
+
+
 
 if __name__ == "__main__":
     main()

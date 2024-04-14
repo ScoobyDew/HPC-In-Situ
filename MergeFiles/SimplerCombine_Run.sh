@@ -4,7 +4,7 @@
 #SBATCH --job-name=Parquet_merging  # Job name
 #SBATCH --nodes=1                   # Number of nodes
 #SBATCH --ntasks-per-node=1        # Number of cores
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=40
 #SBATCH --mem=80G                  # Total memory per node
 #SBATCH --time=06:00:00             # Time limit hrs:min:sec
 #SBATCH --output=result_%j.log      # Standard output and error log
@@ -14,7 +14,6 @@
 module load Python/3.10.8-GCCcore-12.2.0
 export DATA_DIRECTORY=/mnt/parscratch/users/eia19od/Cleaned
 
-pip install dask[complete]
 pip install pandas
 pip install numpy
 pip install fastparquet
