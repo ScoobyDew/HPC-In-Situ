@@ -2,22 +2,11 @@ import os
 import logging
 import pandas as pd
 import dask.dataframe as dd
+import pyarrow.parquet as pq
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
-# try:
-#     import cudf.pandas
-#     cudf.pandas.install()
-#     import pandas as pd
-#     logging.info("Using cuDF")
-#
-# except ImportError:
-#     import pandas as pd
-#     logging.info("Using Pandas")
-#     pass
-
 
 def main():
     logging.info("Starting processing")
@@ -32,30 +21,27 @@ def main():
 
     '''Read the merged parquet file'''
     try:
-        df = dd.read_parquet(filepath, columns=columns)
+        dataset = pq.ParquetDataset(filepath)
+        table = dataset.read(columns=columns)
+        df = dd.from_pandas(table.to_pandas(), npartitions=4)
         df['Part Number'] = df['Part Number'].astype('category')
         logging.info(f"Read parquet file: {filepath}")
     except Exception as e:
         logging.error(f"Error reading {filepath}: {str(e)}")
 
-
     '''Read excel part_parameters file'''
-    parameters = pd.read_excel('part_parameters.xlsx')
-    logging.info("Read excel file")
-    logging.info(f"Parameters: {parameters.columns}")
-    param_columns = [
-        'Part Number',
-        'Power (W)',
-        'Speed (mm/s)',
-        'Focus',
-        'Beam radius (um)',
-    ]
-    for col in param_columns:
-        df[col] = df[col].astype('category')
+    try:
+        parameters = pd.read_excel('part_parameters.xlsx')
+        logging.info("Read excel file")
+        logging.info(f"Parameters: {parameters.columns}")
+        for col in parameters.columns:
+            df[col] = df[col].astype('category')
+    except Exception as e:
+        logging.error(f"Error reading part_parameters.xlsx: {str(e)}")
 
     '''Merge the dataframes'''
     try:
-        df = dd.merge(parameters, on='Part Number', how='left')
+        df = dd.merge(df, parameters, on='Part Number', how='left')
         logging.info("Merged dataframes")
     except Exception as e:
         logging.error(f"Error merging dataframes: {str(e)}")
