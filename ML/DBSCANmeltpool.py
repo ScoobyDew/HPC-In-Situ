@@ -1,61 +1,67 @@
+"""
+This file performs DBSCAN clustering on the combined meltpool data.
+This will be used to indentify the different clusters of meltpools and the
+process parameters that are associated with them.
+"""
+
+import os
+import pickle
+import logging
+import time
+
 import dask
 import dask.dataframe as dd
-from dask.distributed import Client
-from dask_cuda import LocalCUDACluster
-from cuml.cluster import DBSCAN as cuDBSCAN
-from cuml.preprocessing import StandardScaler
-import logging
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+import cudf.pandas
+cudf.pandas.install()
+
+from cuml.cluster import hdbscan
+
+import pandas as pd
+
+import seaborn
+seaborn.set_style("white")
+
+dask.config.set({"dataframe.backend": "cudf"})
+
+# Find time at the start of the processing (date and time)
+start_time = time.strftime('%Y-%m-%d-%H%M%S')
+# Setup logging
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
-    logging.info("Setting Dask to use cuDF as the backend for DataFrame operations.")
-    dask.config.set({"dataframe.backend": "cudf"})
+    """load the data from parquet file"""
+    logging.info("Starting processing...")
+    df = dd.read_parquet('/mnt/parscratch/users/eia19od/combined_params.parquet')
+    logging.info(f"Successfully read parquet file")
 
-    # Setup Dask CUDA cluster
-    try:
-        cluster = LocalCUDACluster()
-        client = Client(cluster)
-        logging.info("Using GPU Dask cluster.")
-        logging.info("Cluster dashboard link: " + client.dashboard_link)
-    except Exception as e:
-        logging.error("Error setting up GPU Dask cluster: %s", e)
-        return
+    # Select the columns to be used for clustering
+    logging.info(f"Selecting columns for clustering and converting to cuDF...")
+    X = df[['mp_width', 'mp_length']].compute()
+    logging.info(f"Successfully converted to cuDF")
 
-    # Load the dataset using Dask with cuDF backend
-    file_path = ''  # Path to your Parquet file
-    logging.info("Loading data from %s", file_path)
-    df = dd.read_parquet(file_path)
-    logging.info("Data loaded successfully.")
+    # Perform DBSCAN clustering
+    clusterer = hdbscan.HDBSCAN(
+        min_samples=10,
+        min_cluster_size=2
+    )
+    logging.info(f"Starting clustering...")
+    clusterer.fit(X)
+    logging.info(f"Clustering complete")
 
-    # Focus on 'mp_width' and 'mp_length' for clustering
-    features = ['mp_width', 'mp_length']
+    # Save the model and all associated data
+    logging.info(f"Saving model and data...")
+    with open(f'/mnt/parscratch/users/eia19od/hdbscan_model_{start_time}.pkl', 'wb') as f:
+        pickle.dump(clusterer, f)
+    logging.info(f"Model saved as pickle")
 
+    # Save the cluster labels
+    X['cluster'] = clusterer.labels_
+    X.to_parquet(f'/mnt/parscratch/users/eia19od/clustered_data_{start_time}.parquet')
+    logging.info(f"Clustered data saved as parquet")
 
-    logging.info("Standardizing features...")
-    scaler = StandardScaler()
-    df[features] = df.map_partitions(lambda part: scaler.fit_transform(part))
-    logging.info("Features standardized.")
-
-    logging.info("Compurting the scaling and applying DBSCAN...")
-    # Compute the scaling and apply DBSCAN
-    df = df.compute()  # Convert to cuDF DataFrame for further processing
-
-    # Parameters for DBSCAN may need tuning
-    eps = 0.5  # Maximum distance between two samples for one to be considered as in the neighborhood of the other
-    min_samples = 5
-    clustering = cuDBSCAN(eps=eps, min_samples=min_samples)
-    df['cluster'] = clustering.fit_predict(df[features])
-
-    logging.info("Clustering completed.")
-
-    # Save the results back to Parquet
-    output_path = '/mnt/parscratch/users/eia19od/clustered.parquet'  # Define your output file path
-    logging.info("Saving clustered data to %s", output_path)
-    df.to_parquet(output_path)
-
-    logging.info("Clustering completed successfully.")
-
-if __name__ == "__main__":
-    main()
+    # Plot clusters in 2D histogram for meltpool width and length
+    # Plotting using Seaborn
+    logging.info(f"Plotting the data...")
+    for

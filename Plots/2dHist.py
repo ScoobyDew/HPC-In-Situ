@@ -14,7 +14,7 @@ import time
 sns.set_style("white")
 
 import dask.dataframe as dd
-
+from matplotlib.colors import LogNorm
 # Find time at the start of the processing (date and time)
 start_time = time.strftime('%Y-%m-%d %H:%M:%S')
 # Setup logging
@@ -46,9 +46,10 @@ def main():
             cmap = 'cividis',
             binwidth=(1, 1),
             cbar=True,
+            norm=LogNorm(),
         )
-        plt.xlim(10,50)
-        plt.ylim(10,70)
+        # plt.xlim(10,50)
+        # plt.ylim(10,70)
         plt.title('2D Histogram of meltpool width and length', fontsize=16)
         plt.xlabel('Melt Pool Width (pixels)')
         plt.ylabel('Melt Pool Length (pixels)')
