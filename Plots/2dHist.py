@@ -9,12 +9,14 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+import time
 # use a clear background for seaborn plots
 sns.set_style("white")
 
 import dask.dataframe as dd
 
+# Find time at the start of the processing (date and time)
+start_time = time.strftime('%Y-%m-%d %H:%M:%S')
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -45,6 +47,8 @@ def main():
             binwidth=(1, 1),
             cbar=True,
         )
+        plt.xlim(10,50)
+        plt.ylim(10,70)
         plt.title('2D Histogram of meltpool width and length', fontsize=16)
         plt.xlabel('Melt Pool Width (pixels)')
         plt.ylabel('Melt Pool Length (pixels)')
@@ -54,11 +58,11 @@ def main():
             os.mkdir("images")
 
         # Save the plot as PNG
-        plt.savefig("images/density_contour.png")
+        plt.savefig(f"images/density_contour_{start_time}.png")
         logging.info("Plot saved as PNG.")
 
         # Save the plot as a pickle file
-        with open("images/density_contour.pkl", 'wb') as f:
+        with open(f"images/density_contour_{start_time}", 'wb') as f:
             pickle.dump(plt.gcf(), f)
         logging.info("Plot saved as pickle.")
 
