@@ -33,10 +33,11 @@ def main():
         df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
 
-        # Set all zero values to NaN
+        import numpy as np
+
+        # Replace all zero values with NaN
         logging.info(f"Replacing all zero values with NaN...")
-        df = df.replace(0, dask.dataframe.utils.make_nan(df['mp_width']))
-        df = df.replace(0, dask.dataframe.utils.make_nan(df['mp_length']))
+        df = df.replace(0, np.nan)
         logging.info(f"Zero values replaced with NaN")
 
         # Convert to pandas dataframe
