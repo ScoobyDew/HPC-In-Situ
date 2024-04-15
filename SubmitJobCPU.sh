@@ -8,7 +8,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=256G
+#SBATCH --mem=240G
 #SBATCH --time=00:15:00
 #SBATCH --output=result.log
 #SBATCH --error=error.log
