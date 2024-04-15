@@ -13,7 +13,7 @@
 
 # Source the Conda initialization script
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/CheckMerge.py
+python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
 date
 
 seff $SLURM_JOBID

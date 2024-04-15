@@ -35,7 +35,10 @@ def main():
 
     # Merge the dataframes on 'Part Number'
     try:
+        logging.info(f"DataFrame shape before merge: {df.shape.compute()}")
+        logging.info(f"Parameters DataFrame shape: {parameters.shape}")
         df = dd.merge(df, parameters, on='Part Number', how='left')
+        logging.info(f"DataFrame shape after merge: {df.shape.compute()}")
         logging.info("Merged dataframes")
     except Exception as e:
         logging.error(f"Error merging dataframes: {str(e)}")
