@@ -1,6 +1,7 @@
 import dask
 import dask.dataframe as dd
-from dask.distributed import Client, LocalCUDACluster
+from dask.distributed import Client
+from dask_cuda import LocalCUDACluster
 from cuml.cluster import DBSCAN as cuDBSCAN
 from cuml.preprocessing import StandardScaler
 import logging
