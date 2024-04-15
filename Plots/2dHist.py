@@ -29,7 +29,7 @@ def main():
 
         # Reset index to ensure uniqueness
         logging.info("Resetting index to ensure it is unique.")
-        df = df.reset_index(drop=True)
+        df = df.reset_index(drop=True).compute()
 
         # Convert to pandas dataframe
         df_pd = df.compute()

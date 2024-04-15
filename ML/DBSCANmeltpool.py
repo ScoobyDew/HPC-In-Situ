@@ -1,77 +1,69 @@
-"""
-This file performs DBSCAN clustering on the combined meltpool data.
-This will be used to indentify the different clusters of meltpools and the
-process parameters that are associated with them.
-"""
-
 import os
 import pickle
 import logging
 import time
-
-import dask
 import dask.dataframe as dd
+import cudf
+import matplotlib.pyplot as plt
+import seaborn as sns
+from cuml import HDBSCAN
 
-import cudf.pandas
-cudf.pandas.install()
-
-from cuml.cluster import hdbscan
-
-import pandas as pd
-
-import seaborn
-seaborn.set_style("white")
-
-dask.config.set({"dataframe.backend": "cudf"})
-
-# Find time at the start of the processing (date and time)
-start_time = time.strftime('%Y-%m-%d-%H%M%S')
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='hdbscan_clustering.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
-    """load the data from parquet file"""
     logging.info("Starting processing...")
-    df = dd.read_parquet('/mnt/parscratch/users/eia19od/combined_params.parquet')
-    logging.info(f"Successfully read parquet file")
+    try:
+        # Load the dataset
+        df = dd.read_parquet('/mnt/parscratch/users/eia19od/combined_params.parquet')
+        logging.info("Successfully read the parquet file.")
 
-    # Select the columns to be used for clustering
-    logging.info(f"Selecting columns for clustering and converting to cuDF...")
-    X = df[['mp_width', 'mp_length']].compute()
-    logging.info(f"Successfully converted to cuDF")
+        # Select the columns to be used for clustering
+        logging.info("Selecting columns for clustering.")
+        df = df[['mp_width', 'mp_length']]
 
-    # Perform DBSCAN clustering
-    clusterer = hdbscan.HDBSCAN(
-        min_samples=10,
-        min_cluster_size=2
-    )
-    logging.info(f"Starting clustering...")
-    clusterer.fit(X)
-    logging.info(f"Clustering complete")
+        # Convert to cuDF DataFrame for clustering
+        logging.info("Converting to cuDF DataFrame for clustering.")
+        X = df.compute()  # Ensure enough memory is available before computing
+        X = cudf.DataFrame.from_pandas(X)
 
-    # Save the model and all associated data
-    logging.info(f"Saving model and data...")
-    with open(f'/mnt/parscratch/users/eia19od/hdbscan_model_{start_time}.pkl', 'wb') as f:
-        pickle.dump(clusterer, f)
-    logging.info(f"Model saved as pickle")
+        # Perform HDBSCAN clustering
+        logging.info("Performing HDBSCAN clustering.")
+        clusterer = HDBSCAN(
+            min_samples=1000,
+            min_cluster_size=1000,
+        )
+        labels = clusterer.fit_predict(X)
+        logging.info("Clustering complete.")
 
-    def assign_cluster_labels(df, labels):
-        df['cluster'] = labels
-        return df
+        # Assign cluster labels to the original cuDF DataFrame
+        logging.info("Assigning cluster labels to the DataFrame.")
+        X['cluster'] = labels
 
+        # Plotting the data
+        logging.info("Plotting the cluster distribution.")
+        plt.figure(figsize=(10, 8))
+        sns.histplot(
+            data=X.to_pandas(),  # Convert back to pandas for plotting
+            x='mp_width',
+            y='mp_length',
+            hue='cluster',
+            palette='viridis',
+            bins=30,  # Adjust based on the range and spread of your data
+            kde=False
+        )
+        plt.title('2D Histogram of Meltpool Width and Length by Cluster')
+        plt.xlabel('Melt Pool Width')
+        plt.ylabel('Melt Pool Length')
+        plt.legend(title='Cluster')
+        plt.grid(True)
+        plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y-%m-%d-%H%M%S")}.png')
+        plt.close()
+        logging.info("Plot saved successfully.")
 
-    # Assign the cluster labels to the original DataFrame
-    logging.info(f"Assigning cluster labels to the data...")
-    df = df.map_partitions(assign_cluster_labels, clusterer.labels_)
-    logging.info(f"Cluster labels assigned")
+    except Exception as e:
+        logging.error("An error occurred during processing.", exc_info=True)
 
-    # Save the DataFrame with Dask
-    logging.info(f"Saving the DataFrame with cluster labels...")
-    df.to_parquet(f'/mnt/parscratch/users/eia19od/combined_params_clustered_{start_time}.parquet')
-    logging.info(f"DataFrame saved as parquet")
-
-    # Plot clusters in 2D histogram for meltpool width and length
-    # Plotting using Seaborn
-    logging.info(f"Plotting the data...")
-    for
+if __name__ == "__main__":
+    main()
