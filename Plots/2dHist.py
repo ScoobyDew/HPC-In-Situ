@@ -47,9 +47,15 @@ def main():
         # Save the plot to a file
         if not os.path.exists("images"):
             os.mkdir("images")
-        fig.write_image("images/fig1.png")
+        fig.write_html("images/fig1.html")  # To save as HTML
+
     except Exception as e:
         logging.error(f"Error encountered: {str(e)}")
+
+    logging.info("Processing complete")
+
+    # save the plot to a file
+
 
 if __name__ == "__main__":
     main()
