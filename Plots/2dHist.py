@@ -32,10 +32,26 @@ def main():
         # Read the merged parquet file using dask_cudf
         df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
+
+        # Set all zero values to NaN
+        logging.info(f"Replacing all zero values with NaN...")
+        df = df.replace(0, dask.dataframe.utils.make_nan(df['mp_width']))
+        df = df.replace(0, dask.dataframe.utils.make_nan(df['mp_length']))
+        logging.info(f"Zero values replaced with NaN")
+
+        # Convert to pandas dataframe
+        logging.info(f"Converting to pandas dataframe...")
         df_pd = df.compute()
-        logging.info(f"Successfully converted to pandas dataframe")
+        logging.info(f"Converted to pandas dataframe")
 
         logging.info(f"Plotting the data...")
+
+        # Specify vmin and vmax
+        vmin = 1
+        vmax = 7.1e6
+
+        # Create a LogNorm instance with vmin and vmax
+        norm = LogNorm(vmin=vmin, vmax=vmax)
 
         # Plotting using Seaborn
         plt.figure(figsize=(10, 8))

@@ -56,10 +56,20 @@ def main():
         pickle.dump(clusterer, f)
     logging.info(f"Model saved as pickle")
 
-    # Save the cluster labels
-    X['cluster'] = clusterer.labels_
-    X.to_parquet(f'/mnt/parscratch/users/eia19od/clustered_data_{start_time}.parquet')
-    logging.info(f"Clustered data saved as parquet")
+    def assign_cluster_labels(df, labels):
+        df['cluster'] = labels
+        return df
+
+
+    # Assign the cluster labels to the original DataFrame
+    logging.info(f"Assigning cluster labels to the data...")
+    df = df.map_partitions(assign_cluster_labels, clusterer.labels_)
+    logging.info(f"Cluster labels assigned")
+
+    # Save the DataFrame with Dask
+    logging.info(f"Saving the DataFrame with cluster labels...")
+    df.to_parquet(f'/mnt/parscratch/users/eia19od/combined_params_clustered_{start_time}.parquet')
+    logging.info(f"DataFrame saved as parquet")
 
     # Plot clusters in 2D histogram for meltpool width and length
     # Plotting using Seaborn
