@@ -20,7 +20,7 @@
 module load CUDA/12.0.0
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/Plots/2dHist.py
+python /users/eia19od/in_situ/HPC-In-Situ/ML/DBSCANmeltpool.py
 date
 seff $SLURM_JOBID
 
