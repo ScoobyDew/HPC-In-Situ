@@ -10,7 +10,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import dask.dataframe as dd
-# dask.config.set({"dataframe.backend": "cudf"})
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -18,18 +17,22 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 
 
 def main():
+
     logging.basicConfig(level=logging.INFO)
     logging.info("Starting processing")
     filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
 
     try:
         # Read the merged parquet file using dask_cudf
-        df = dd.read_parquet(filepath)
+        df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
+        df_sample = df.sample(frac=0.1).compute()  # Adjust the fraction as needed
+        logging.info(f"Successfully sampled the data")
 
+        logging.info(f"Plotting the data")
         # Plotting using Plotly Express
         fig = px.density_contour(
-            df,
+            df_sample,
             x='mp_width',
             y='mp_length',
             nbinsx=100,
