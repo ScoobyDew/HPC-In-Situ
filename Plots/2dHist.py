@@ -3,14 +3,12 @@ Plots two of the parameteres of the data from combined_params.parquet against ea
 """
 import logging
 import os
-# import cudf.pandas
-# cudf.pandas.install()
+import dask
 import plotly.express as px
 
 import pandas as pd
 import matplotlib.pyplot as plt
-import dask
-import dask_cudf
+
 import dask.dataframe as dd
 dask.config.set({"dataframe.backend": "cudf"})
 
@@ -26,7 +24,7 @@ def main():
 
     try:
         # Read the merged parquet file using dask_cudf
-        df = dask_cudf.read_parquet(filepath)
+        df = dd.read_parquet(filepath)
         df = df.compute()  # Compute the Dask DataFrame to convert it to a cuDF DataFrame
         logging.info(f"Read parquet file: {filepath}")
 
