@@ -5,9 +5,13 @@ import logging
 import os
 import dask
 import plotly.express as px
-
+import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+# use a clear background for seaborn plots
+sns.set_style("whitegrid")
 
 import dask.dataframe as dd
 
@@ -30,29 +34,33 @@ def main():
         logging.info(f"Successfully sampled the data")
 
         logging.info(f"Plotting the data")
-        # Plotting using Plotly Express
-        fig = px.density_contour(
-            df_sample,
-            x='mp_width',
-            y='mp_length',
-            nbinsx=100,
-            nbinsy=100,
-            title='Density Contour of mp_width vs mp_length'
-        )
-        fig.update_layout(
-            xaxis_title='melt pool width',
-            yaxis_title='melt pool length'
-        )
 
-        # Save the plot to a file
+        # Plotting using Seaborn
+        plt.figure(figsize=(10, 8))
+        sns.kdeplot(data=df_sample, x='mp_width', y='mp_length', fill=True, thresh=0, levels=100, cmap="mako")
+        plt.title('Density Contour of mp_width vs mp_length')
+        plt.xlabel('Melt Pool Width')
+        plt.ylabel('Melt Pool Length')
+
+        # Ensure the 'images' directory exists
         if not os.path.exists("images"):
             os.mkdir("images")
-        fig.write_html("images/fig1.html")  # To save as HTML
 
-    except Exception as e:
-        logging.error(f"Error encountered: {str(e)}")
+        # Save the plot as PNG
+        plt.savefig("images/density_contour.png")
+        logging.info("Plot saved as PNG.")
 
-    logging.info("Processing complete")
+        # Save the plot as a pickle file
+        with open("images/density_contour.pkl", 'wb') as f:
+            pickle.dump(plt.gcf(), f)
+        logging.info("Plot saved as pickle.")
+
+    finally:
+        # Clear the plotting area for any further plots
+        plt.clf()
+
+
+    logging.info("Processing Finished")
 
     # save the plot to a file
 
