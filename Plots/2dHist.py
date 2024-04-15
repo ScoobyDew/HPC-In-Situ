@@ -2,8 +2,8 @@
 Plots two of the parameteres of the data from combined_params.parquet against each other
 """
 import logging
-import cudf.pandas
-cudf.pandas.install()
+# import cudf.pandas
+# cudf.pandas.install()
 
 import pandas as pd
 import matplotlib.pyplot as plt
