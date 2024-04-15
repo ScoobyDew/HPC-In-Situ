@@ -34,7 +34,7 @@ def main():
 
     # Try to print the first 5 rows of ['Part Number', 'Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']
     try:
-        head = df[['Part Number', 'Power (W)', 'Speed (mm/s)', 'Focus', 'Beam radius (um)']].head()
+        head = df[['Power (W)', 'mp_width']].head()
         logging.info(f"Head: {head}")
     except Exception as e:
         logging.error(f"Error getting head merged params: {str(e)}")
