@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # use a clear background for seaborn plots
-sns.set_style("whitegrid")
+sns.set_style("white")
 
 import dask.dataframe as dd
 
@@ -30,17 +30,25 @@ def main():
         # Read the merged parquet file using dask_cudf
         df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
-        df_sample = df.sample(frac=0.1).compute()  # Adjust the fraction as needed
-        logging.info(f"Successfully sampled the data")
+        # df_sample = df.sample(frac=0.1).compute()  # Adjust the fraction as needed
+        # logging.info(f"Successfully sampled the data")
 
         logging.info(f"Plotting the data")
 
         # Plotting using Seaborn
         plt.figure(figsize=(10, 8))
-        sns.histplot(data=df_sample, x='mp_width', y='mp_length', binwidth=(0.5, 0.5), cbar=True)
-        plt.title('2D Histogram of mp_width vs mp_length')
-        plt.xlabel('Melt Pool Width')
-        plt.ylabel('Melt Pool Length')
+        sns.histplot(
+            data=df,
+            x='mp_width',
+            y='mp_length',
+            cmap = 'cividis',
+            binwidth=(1, 1),
+            cbar=True,
+
+        )
+        plt.title('2D Histogram of meltpool width and length', fontsize=16)
+        plt.xlabel('Melt Pool Width (pixels)')
+        plt.ylabel('Melt Pool Length (pixels)')
 
         # Ensure the 'images' directory exists
         if not os.path.exists("images"):
