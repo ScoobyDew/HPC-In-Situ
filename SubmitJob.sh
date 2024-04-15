@@ -10,7 +10,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task=4
-#SBATCH --gres=gpu:4       # 4 GPUs for job
+#SBATCH --gres=gpu:1       # 4 GPUs for job
 #SBATCH --mem=256G
 #SBATCH --time=00:30:00
 #SBATCH --output=result.log
