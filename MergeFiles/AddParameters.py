@@ -1,4 +1,7 @@
-import os
+"""
+Merges the combined data with the part parameters and saves the result to a new parquet file.
+- Successful 11:00 15-04-24
+"""
 import logging
 import pandas as pd
 import dask.dataframe as dd

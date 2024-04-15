@@ -1,4 +1,7 @@
-# Create a script which checks the collumns of a merged parquet file
+"""
+Create a script which checks the collumns of a merged parquet file
+- Successful 11:00 15-04-24
+"""
 
 import os
 import pandas as pd
