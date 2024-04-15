@@ -37,8 +37,8 @@ def main():
 
         # Plotting using Seaborn
         plt.figure(figsize=(10, 8))
-        sns.kdeplot(data=df_sample, x='mp_width', y='mp_length', fill=True, thresh=0, levels=100, cmap="mako")
-        plt.title('Density Contour of mp_width vs mp_length')
+        sns.histplot(data=df_sample, x='mp_width', y='mp_length', binwidth=(0.5, 0.5), cbar=True)
+        plt.title('2D Histogram of mp_width vs mp_length')
         plt.xlabel('Melt Pool Width')
         plt.ylabel('Melt Pool Length')
 
