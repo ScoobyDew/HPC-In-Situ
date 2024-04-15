@@ -44,6 +44,9 @@ def main():
     try:
         df_shape_before = df.shape
         parameters_shape = parameters.shape
+        logging.info(f"DataFrame shape before merge: {(df_shape_before[0].compute(), df_shape_before[1])}")
+        logging.info(f"Parameters DataFrame shape: {parameters_shape}")
+        logging.info("Merging dataframes")
         df = dd.merge(df, parameters, on='Part Number', how='left')
         df_shape_after = df.shape
 
