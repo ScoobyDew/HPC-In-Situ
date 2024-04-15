@@ -2,32 +2,45 @@
 Plots two of the parameteres of the data from combined_params.parquet against each other
 """
 import logging
+import os
 # import cudf.pandas
 # cudf.pandas.install()
+import plotly.express as px
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import dask
+import dask_cudf
 import dask.dataframe as dd
 dask.config.set({"dataframe.backend": "cudf"})
 
-def main():
-    # Read the merged parquet file
-    filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
-    try:
-        df = dd.read_parquet(filepath)
-        logging.info(f"Read parquet file: {filepath}")
-    except Exception as e:
-        logging.error(f"Error reading {filepath}: {str(e)}")
-        return
+# Setup logging
+logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
-    # try to plot mp_width against mp_length in 2d histogram
+
+def main():
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Starting processing")
+    filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
+
     try:
-        plt.hist2d(df['mp_width'], df['mp_length'], bins=(100, 100), cmap=plt.cm.jet)
-        plt.show()
+        # Read the merged parquet file using dask_cudf
+        df = dask_cudf.read_parquet(filepath)
+        df = df.compute()  # Compute the Dask DataFrame to convert it to a cuDF DataFrame
+        logging.info(f"Read parquet file: {filepath}")
+
+        # Plotting using Plotly Express
+        fig = px.density_contour(df, x='mp_width', y='mp_length', nbinsx=100, nbinsy=100,
+                                 title='Density Contour of mp_width vs mp_length')
+        fig.update_layout(xaxis_title='mp_width', yaxis_title='mp_length')
+
+        # Save the plot to a file
+        if not os.path.exists("images"):
+            os.mkdir("images")
+        fig.write_image("images/fig1.png")
     except Exception as e:
-        logging.error(f"Error plotting: {str(e)}")
-        return
+        logging.error(f"Error encountered: {str(e)}")
 
 if __name__ == "__main__":
     main()
