@@ -12,6 +12,8 @@ logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
 filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
 
 def main():
+    logging.info("Starting processing")
+    logging.info(f"Reading parquet file: {filepath}")
     # Read the merged parquet file
     try:
         df = pd.read_parquet(filepath)
