@@ -25,13 +25,21 @@ def main():
     try:
         # Read the merged parquet file using dask_cudf
         df = dd.read_parquet(filepath)
-        df = df.compute()  # Compute the Dask DataFrame to convert it to a cuDF DataFrame
         logging.info(f"Read parquet file: {filepath}")
 
         # Plotting using Plotly Express
-        fig = px.density_contour(df, x='mp_width', y='mp_length', nbinsx=100, nbinsy=100,
-                                 title='Density Contour of mp_width vs mp_length')
-        fig.update_layout(xaxis_title='mp_width', yaxis_title='mp_length')
+        fig = px.density_contour(
+            df,
+            x='mp_width',
+            y='mp_length',
+            nbinsx=100,
+            nbinsy=100,
+            title='Density Contour of mp_width vs mp_length'
+        )
+        fig.update_layout(
+            xaxis_title='melt pool width',
+            yaxis_title='melt pool length'
+        )
 
         # Save the plot to a file
         if not os.path.exists("images"):
