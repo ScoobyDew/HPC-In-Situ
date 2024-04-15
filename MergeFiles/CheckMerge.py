@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import logging
 from multiprocessing import Pool
+import dask.dataframe as dd
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
@@ -16,7 +17,7 @@ def main():
     logging.info(f"Reading parquet file: {filepath}")
     # Read the merged parquet file
     try:
-        df = pd.read_parquet(filepath)
+        df = dd.read_parquet(filepath)
         logging.info(f"Read parquet file: {filepath}")
     except Exception as e:
         logging.error(f"Error reading {filepath}: {str(e)}")
