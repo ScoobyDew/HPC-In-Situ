@@ -30,21 +30,20 @@ def main():
         # Read the merged parquet file using dask_cudf
         df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
-        # df_sample = df.sample(frac=0.1).compute()  # Adjust the fraction as needed
-        # logging.info(f"Successfully sampled the data")
+        df_pd = df.compute()
+        logging.info(f"Successfully converted to pandas dataframe")
 
-        logging.info(f"Plotting the data")
+        logging.info(f"Plotting the data...")
 
         # Plotting using Seaborn
         plt.figure(figsize=(10, 8))
         sns.histplot(
-            data=df,
+            data=df_pd,
             x='mp_width',
             y='mp_length',
             cmap = 'cividis',
             binwidth=(1, 1),
             cbar=True,
-
         )
         plt.title('2D Histogram of meltpool width and length', fontsize=16)
         plt.xlabel('Melt Pool Width (pixels)')
