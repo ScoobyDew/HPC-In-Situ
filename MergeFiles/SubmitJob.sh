@@ -15,7 +15,6 @@
 
 # Source the Conda initialization script
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-module load CUDA/12.0.0
 python /users/eia19od/in_situ/HPC-In-Situ/MergeFiles/AddParameters.py
 date
 
