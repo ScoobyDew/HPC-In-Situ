@@ -26,11 +26,10 @@ def main():
 
         # Replace all zero values with NaN
         df = df.replace(0, np.nan)
-        
-        # Check for duplicate indices
-        if df.index.duplicated().any().compute():
-            logging.error("Duplicate indices found in the DataFrame.")
-            raise ValueError("Duplicate indices found in the DataFrame.")
+
+        # Reset index to ensure uniqueness
+        logging.info("Resetting index to ensure it is unique.")
+        df = df.reset_index(drop=True)
 
         # Convert to pandas dataframe
         df_pd = df.compute()
