@@ -40,9 +40,12 @@ def main():
     except Exception as e:
         logging.error(f"Error merging dataframes: {str(e)}")
 
+    # Reset the index before saving to Parquet
+    df = df.reset_index(drop=True)
+
     # Save the processed DataFrame to a new parquet file
     output_file = '/mnt/parscratch/users/eia19od/combined_params.parquet'
-    df.to_parquet(output_file, index=False)
+    df.to_parquet(output_file)
 
     logging.info("Processing completed successfully")
 
