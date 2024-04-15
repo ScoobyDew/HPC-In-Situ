@@ -10,7 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import dask.dataframe as dd
-dask.config.set({"dataframe.backend": "cudf"})
+# dask.config.set({"dataframe.backend": "cudf"})
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
