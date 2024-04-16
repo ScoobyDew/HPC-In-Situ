@@ -154,7 +154,7 @@ def main():
         df = add_normenthalpy(df)
         logging.info("Successfully added normalised enthalpy")
     except Exception as e:
-        logging.error("Error adding normalised enthalpy: {e}")
+        logging.error(f"Error adding normalised enthalpy: {e}")
         return
 
     try:
