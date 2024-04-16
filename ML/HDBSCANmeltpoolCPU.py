@@ -9,7 +9,7 @@ import seaborn as sns
 from sklearn.cluster import HDBSCAN  # Corrected import
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='hdbscan_clustering_cpu.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='hdbscancpu.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
@@ -18,6 +18,9 @@ def main():
         # Load the dataset
         df = dd.read_parquet('/mnt/parscratch/users/eia19od/combined_params.parquet')
         logging.info("Successfully read the parquet file.")
+
+        # Sample to reduce the size of the dataset to 0.01% of the original size
+        df = dd.sample(df, frac=0.001)
 
         # Select the columns to be used for clustering
         logging.info("Selecting columns for clustering.")
@@ -30,8 +33,8 @@ def main():
         # Perform HDBSCAN clustering
         logging.info("Performing HDBSCAN clustering.")
         clusterer = HDBSCAN(
-            min_samples=1000,
-            min_cluster_size=1000,
+            min_samples=10,
+            min_cluster_size=10,
         )
         labels = clusterer.fit_predict(X)
         logging.info("Clustering complete.")
