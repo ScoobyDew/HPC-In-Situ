@@ -12,7 +12,7 @@ import gc
 import pandas as pd
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='sample_parquet.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='sample.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def sample_data(filepath, frac=0.0001):
@@ -30,4 +30,9 @@ def sample_data(filepath, frac=0.0001):
     df_sampled.to_parquet(new_filepath, engine='pyarrow')
     logging.info(f"Saved sampled data to: {new_filepath}")
 
-    return new_filepath
+def main():
+    filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
+    sample_data(filepath)
+
+if __name__ == "__main__":
+    main()
