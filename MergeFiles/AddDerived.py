@@ -69,7 +69,7 @@ def add_normenthalpy(dd, absorptivity=0.3, T_m=1323, T_0=298, r_B=0.1, rho=0.008
 
     # Calculate the normalized enthalpy using the correct formula with square root
     dd['Normalised Enthalpy'] = (n * dd['Power (W)']) / (
-                hs * np.sqrt(a * dd['Laser Speed (mm/s)'] * (dd['Beam radius (um)'] / 1000) ** 3))
+                hs * np.sqrt(a * dd['Speed (mm/s)'] * (dd['Beam radius (um)'] / 1000) ** 3))
 
     logging.info("Added Normalised Enthalpy to the DataFrame")
     return dd
@@ -124,10 +124,10 @@ def add_NVED(dd, absorptivity=0.3, T_m=1323, T_0=298, r_B=0.1, rho=0.008395, C_p
     l = 30
 
     # Calculate the normalised volumetric energy density
-    dd['E*'] = (A * dd['Power (W)']) / (2 * dd['Laser Speed (mm/s)'] * l * (dd['Beam radius (um)'] / 1000)) * \
+    dd['E*'] = (A * dd['Power (W)']) / (2 * dd['Speed (mm/s)'] * l * (dd['Beam radius (um)'] / 1000)) * \
                (1 / (0.67 * rho * C_p * (T_m - T_0)))
 
-    dd['1/h*'] = (dd['Beam radius (um)'] * 1e-3) / dd['Laser Speed (mm/s)']
+    dd['1/h*'] = (dd['Beam radius (um)'] * 1e-3) / dd['Speed (mm/s)']
 
     dd['E*0'] = dd['E*'] * dd['1/h*']
     logging.info("Added Normalised Volumetric Energy Density to the DataFrame")
