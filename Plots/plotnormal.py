@@ -3,21 +3,15 @@ import os
 import numpy as np
 import dask.dataframe as dd
 import matplotlib.pyplot as plt
-import seaborn as sns
-import time
-import pickle
-from matplotlib.colors import LogNorm, Normalize
-from matplotlib.ticker import MaxNLocator
+from matplotlib.colors import LogNorm
 from scipy.stats import pearsonr
+import time
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='plot.log', filemode='w',
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='plot.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
 
-def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap):
+def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap, fig):
     """Function to plot each subplot with histogram, regression, and annotations."""
-
-
     # Plotting histogram
     h = ax.hist2d(df[x_var], df[y_var], bins=50, norm=LogNorm(), cmap=cmap)
     cbar = fig.colorbar(h[3], ax=ax)
@@ -55,17 +49,15 @@ def main():
 
     # Define plot variables
     plot_vars = [
-        ('mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity',
-         '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'),
-        ('pyro2', 'Normalised Enthalpy', 'Pyrometer Voltage (mV)',
-         '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage', 'cividis'),
+        ('mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'),
+        ('pyro2', 'Normalised Enthalpy', 'Pyrometer Voltage (mV)', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage', 'cividis'),
         ('mp_intensity', 'E*0', 'Meltpool Pixel Count', '$E_0^*$', '$E_0^*$ vs Meltpool Pixel Count', 'viridis'),
         ('pyro2', 'E*0', 'Pyrometer Voltage (mV)', '$E_0^*$', '$E_0^*$ vs Pyrometer Voltage', 'viridis')
     ]
 
     # Create each subplot individually
     for ax, var_details in zip(axs.flat, plot_vars):
-        plot_subplot(df, *var_details, ax)
+        plot_subplot(df, *var_details, ax, fig)  # Pass fig as well
 
     fig.suptitle('2D Histograms of Insitu Parameters and Associated Dimensionless Quantities')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
@@ -78,3 +70,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
