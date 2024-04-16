@@ -69,9 +69,14 @@ def main():
         plt.savefig(f"images/density_contour_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png")
         logging.info("Plot saved as PNG.")
 
+        hist_save = {
+            'x_bins': x_bins,
+            'y_bins': y_bins,
+            'hist': h
+        }
         # Save the plot as a pickle file
         with open(f"images/density_contour_{time.strftime('%Y_%m_%d %H_%M_%S')}.pkl", 'wb') as f:
-            pickle.dump(plt.gcf(), f)
+            pickle.dump(hist_save, f)
         logging.info("Plot saved as pickle.")
 
     except Exception as e:
