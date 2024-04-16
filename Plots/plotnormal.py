@@ -41,6 +41,11 @@ def plot_subplot(args):
     ax.annotate(f'{line_eq}\n{corr_info}', xy=(0.05, 0.95), xycoords='axes fraction',
                 verticalalignment='top', fontsize=10, color='red')
 
+    # Removing problematic characters and replace spaces
+    safe_title = title.replace(' ', '_').replace('$', '').replace('\\', '')
+    timestamp = time.strftime('%Y_%m_%d_%H_%M_%S')
+    filename = f"images/{safe_title}_{timestamp}.png"
+
     # Save each subplot as an individual image
     if not os.path.exists("images"):
         os.mkdir("images")
