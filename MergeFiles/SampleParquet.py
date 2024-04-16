@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO, filename='sample.log', filemode='w',
 def sample_data(filepath, frac=0.0001):
     """Sample the data and save to a new parquet file."""
     logging.info(f"Reading parquet file: {filepath}")
-    df = dd.read_parquet(filepath)  # Loading with Dask
+    df = dd.read_parquet(filepath, engine='pyarrow')  # Loading with Dask
     logging.info(f"Read parquet file: {filepath}")
 
     logging.info(f"Sampling data with fraction: {frac}")
@@ -26,11 +26,16 @@ def sample_data(filepath, frac=0.0001):
 
     logging.info(f"Columns: {df_sampled.columns}")
     logging.info(f"Data types: {df_sampled.dtypes}")
+    logging.info(f"Shape: {df_sampled.shape}")
 
+    #
     # Prepare to save the sampled data to a new parquet file
-    new_filepath = '/mnt/parscratch/users/eia19od/combined_sampled.parquet'
+    new_filepath = '/mnt/parscratch/users/eia19od/combined_sampled2.parquet'
     logging.info(f"Saving sampled data to: {new_filepath}")
-    df_sampled.to_parquet(new_filepath, engine='pyarrow', index=False)  # Saving with Pandas
+    df_sampled.to_parquet(new_filepath,
+                          engine='pyarrow',
+                          index=False,
+                          compute=True)  # Saving with Pandas
     logging.info(f"Saved sampled data to: {new_filepath}")
 
     # Clean up to free memory
