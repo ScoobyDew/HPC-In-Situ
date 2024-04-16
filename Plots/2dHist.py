@@ -5,7 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import time
 import pickle
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Normalize
+from matplotlib.ticker import MaxNLocator
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='hist.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
@@ -35,7 +36,10 @@ def main():
             y='mp_length',
             cmap='cividis',
             binwidth=(1, 1),
-            cbar=True,
+            cbar_kwargs={
+                'ticks': MaxNLocator(2),
+                'format': '%.e'
+            },
             norm=norm
         )
         plt.title('2D Histogram of meltpool width and length', fontsize=16)
@@ -47,11 +51,11 @@ def main():
             os.mkdir("images")
 
         # Save the plot as PNG
-        plt.savefig(f"images/density_contour_{time.strftime('%Y-%m-%d %H:%M:%S')}.png")
+        plt.savefig(f"images/density_contour_{time.strftime('%Y_%m_%d %H_%M_%S')}.png")
         logging.info("Plot saved as PNG.")
 
         # Save the plot as a pickle file
-        with open(f"images/density_contour_{time.strftime('%Y-%m-%d %H:%M:%S')}.pkl", 'wb') as f:
+        with open(f"images/density_contour_{time.strftime('%Y_%m_%d %H_%M_%S')}.pkl", 'wb') as f:
             pickle.dump(plt.gcf(), f)
         logging.info("Plot saved as pickle.")
 
