@@ -44,23 +44,25 @@ def load_data(filepath, columns):
 
 def main():
     filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
-    # Only use the first set of plot variables
-    columns, x_label, y_label, title, cmap = ['mp_intensity', 'Normalised Enthalpy'], 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'
+    plot_vars = [
+        (['mp_intensity', 'Normalised Enthalpy'], 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis')
+    ]
 
-    fig, ax = plt.subplots(1, 1, figsize=(7.5, 7.5))  # Adjust subplot to create a single plot
+    fig, axs = plt.subplots(2, 2, figsize=(15, 15))
 
-    df = load_data(filepath, columns)
-    plot_subplot(df, columns[0], columns[1], x_label, y_label, title, ax, cmap, fig)
-    del df  # Delete the dataframe to free memory
-    gc.collect()  # Collect garbage to free memory
+    for ax, (columns, x_label, y_label, title, cmap) in zip(axs.flat, plot_vars):
+        df = load_data(filepath, columns)
+        plot_subplot(df, columns[0], columns[1], x_label, y_label, title, ax, cmap, fig)
+        del df  # Delete the dataframe to free memory
+        gc.collect()  # Collect garbage to free memory
 
-    fig.suptitle('2D Histogram of Insitu Parameters and Associated Dimensionless Quantities')
+    fig.suptitle('2D Histograms of Insitu Parameters and Associated Dimensionless Quantities')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
     # Save the plot
     if not os.path.exists("images"):
         os.mkdir("images")
-    plt.savefig(f"images/2d_hist_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png", dpi=300)
+    plt.savefig(f"images/2d_hist_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png", dpi=500)
     plt.close(fig)  # Close the figure to free memory
     logging.info("Plot saved as PNG.")
     logging.info("Processing Finished")
