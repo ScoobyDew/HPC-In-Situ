@@ -16,7 +16,7 @@
 # Source the Conda initialization script
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/Plot/pyro_mp_hist.py
+python /users/eia19od/in_situ/HPC-In-Situ/Plots/pyro_mp_hist.py
 date
 seff $SLURM_JOBID
 
