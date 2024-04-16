@@ -139,42 +139,29 @@ def main():
     filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
 
     # Try to read the parquet file
-    try:
-        logging.info("Loading parquet file")
-        df = dd.read_parquet(filepath)
-        logging.info(f"Successfully read parquet file: {filepath}")
-        logging.info(f"Columns: {df.columns}")
-    except Exception as e:
-        logging.error(f"Error reading parquet file: {filepath}, {e}")
-        return
+    logging.info("Loading parquet file")
+    df = dd.read_parquet(filepath)
+    logging.info(f"Successfully read parquet file: {filepath}")
+    logging.info(f"Columns: {df.columns}")
 
     # Add derived parameters
-    try:
-        logging.info("Adding normalised enthalpy")
-        df = add_normenthalpy(df)
-        logging.info("Successfully added normalised enthalpy")
-    except Exception as e:
-        logging.error(f"Error adding normalised enthalpy: {e}")
-        return
+    logging.info("Adding normalised enthalpy")
+    df = add_normenthalpy(df)
+    logging.info("Successfully added normalised enthalpy")
 
-    try:
-        logging.info("Adding normalised volumetric energy density")
-        df = add_NVED(df)
-        logging.info("Successfully added normalised volumetric energy density")
-    except Exception as e:
-        logging.error(f"Error adding normalised volumetric energy density: {e}")
-        return
 
-    try:
-        # Save the DataFrame as a parquet file
-        logging.info("Saving DataFrame as a parquet file")
-        df.to_parquet('/mnt/parscratch/users/eia19od/combined_derived.parquet')
-        logging.info("Successfully saved DataFrame as a parquet file")
-    except Exception as e:
-        logging.error(f"Error saving DataFrame as a parquet file: {e}")
+    logging.info("Adding normalised volumetric energy density")
+    df = add_NVED(df)
+    logging.info("Successfully added normalised volumetric energy density")
 
-    finally:
-        logging.info("Processing complete")
+
+
+    # Save the DataFrame as a parquet file
+    logging.info("Saving DataFrame as a parquet file")
+    df.to_parquet('/mnt/parscratch/users/eia19od/combined_derived.parquet')
+    logging.info("Successfully saved DataFrame as a parquet file")
+
+    logging.info("Processing complete")
 
 if __name__ == '__main__':
     main()
