@@ -36,7 +36,7 @@ def main():
             y='mp_length',
             cmap='cividis',
             binwidth=(1, 1),
-            cbar_kwargs={
+            cbar_kws={
                 'ticks': MaxNLocator(2),
                 'format': '%.e'
             },
