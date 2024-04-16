@@ -16,7 +16,7 @@
 # Source the Conda initialization script
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/ML/HDBSCANmeltpool.CPU
+python /users/eia19od/in_situ/HPC-In-Situ/ML/DBSCANmeltpool.py
 date
 seff $SLURM_JOBID
 

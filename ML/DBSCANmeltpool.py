@@ -3,13 +3,13 @@ import pickle
 import logging
 import time
 import dask.dataframe as dd
-import cudf
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from cuml import HDBSCAN
+from sklearn.cluster import DBSCAN  # Corrected import
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='hdbscan_clustering.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='dbscancpu.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
@@ -20,27 +20,26 @@ def main():
         logging.info("Successfully read the parquet file.")
 
         # Sample to reduce the size of the dataset to 0.01% of the original size
-        df = dd.sample(df, frac=0.001)
+        df = df.sample(frac=0.001)
 
         # Select the columns to be used for clustering
         logging.info("Selecting columns for clustering.")
         df = df[['mp_width', 'mp_length']]
 
-        # Convert to cuDF DataFrame for clustering
-        logging.info("Converting to cuDF DataFrame for clustering.")
+        # Convert to Pandas DataFrame for clustering
+        logging.info("Converting to Pandas DataFrame for clustering.")
         X = df.compute()  # Ensure enough memory is available before computing
-        X = cudf.DataFrame.from_pandas(X)
 
-        # Perform HDBSCAN clustering
-        logging.info("Performing HDBSCAN clustering.")
-        clusterer = HDBSCAN(
-            min_samples=1000,
-            min_cluster_size=1000,
+        # Perform DBSCAN clustering
+        logging.info("Performing DBSCAN clustering.")
+        clusterer = DBSCAN(
+            eps=5,  # Example value; adjust based on domain knowledge and experimentation
+            min_samples=10
         )
         labels = clusterer.fit_predict(X)
         logging.info("Clustering complete.")
 
-        # Assign cluster labels to the original cuDF DataFrame
+        # Assign cluster labels to the original Pandas DataFrame
         logging.info("Assigning cluster labels to the DataFrame.")
         X['cluster'] = labels
 
@@ -48,7 +47,7 @@ def main():
         logging.info("Plotting the cluster distribution.")
         plt.figure(figsize=(10, 8))
         sns.histplot(
-            data=X.to_pandas(),  # Convert back to pandas for plotting
+            data=X,
             x='mp_width',
             y='mp_length',
             hue='cluster',
