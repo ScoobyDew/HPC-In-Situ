@@ -38,8 +38,7 @@ def sample_data(filepath, frac=0.0001):
     logging.info(f"Saving sampled data to: {new_filepath}")
     df_sampled.to_parquet(new_filepath,
                           engine='pyarrow',
-                          index=False,
-                          compute=True)  # Saving with Pandas
+                          index=False).compute()  # Saving with Pandas
     logging.info(f"Saved sampled data to: {new_filepath}")
 
     # Clean up to free memory
