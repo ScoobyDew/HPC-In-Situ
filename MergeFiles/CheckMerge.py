@@ -13,7 +13,7 @@ import dask.dataframe as dd
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
+filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
 
 def main():
     logging.info("Starting processing")

@@ -163,6 +163,10 @@ def main():
 
     logging.info("Processing complete")
 
+    # Open the parquet file and read the first 5 rows
+    df = pd.read_parquet('/mnt/parscratch/users/eia19od/combined_derived.parquet')
+    logging.info(f"First 5 rows: {df.head()}")
+
 if __name__ == '__main__':
     main()
 
