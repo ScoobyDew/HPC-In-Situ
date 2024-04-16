@@ -19,7 +19,7 @@ def main():
     try:
         # Read the merged parquet file using dask, filtering out zeros in 'mp_width' and 'mp_length'
         filters = [('pyro2', '>', 0), ('mp_intensity', '>', 0)]
-        df = dd.read_parquet(filepath, columns=['pyro2', 'mp_length'], filters=filters)
+        df = dd.read_parquet(filepath, columns=['pyro2', 'mp_intensity'], filters=filters)
         logging.info(f"Successfully read parquet file: {filepath}")
 
         # Convert Dask DataFrame to Pandas DataFrame
