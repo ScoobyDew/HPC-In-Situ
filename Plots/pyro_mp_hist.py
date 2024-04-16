@@ -21,6 +21,7 @@ def main():
         filters = [('pyro2', '>', 0), ('mp_intensity', '>', 0)]
         df = dd.read_parquet(filepath, columns=['pyro2', 'mp_intensity'], filters=filters)
         logging.info(f"Successfully read parquet file: {filepath}")
+        logging.info(f"Columns: {df.columns}")
 
         # Convert Dask DataFrame to Pandas DataFrame
         df_pd = df.compute()
