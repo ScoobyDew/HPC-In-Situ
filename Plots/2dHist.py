@@ -24,7 +24,10 @@ def main():
         df_pd = df.compute()
         logging.info("Converted to pandas dataframe")
 
-        # Since we have applied the filter at read time, we can directly proceed to plotting without further data cleaning
+        # Prepare the normalization
+        norm = LogNorm(vmin=1, vmax=7.1e6)
+
+        # Plotting
         plt.figure(figsize=(10, 8))
         sns.histplot(
             data=df_pd,
@@ -33,7 +36,7 @@ def main():
             cmap='cividis',
             binwidth=(1, 1),
             cbar=True,
-            norm=LogNorm(vmin=1, vmax=7.1e6),
+            norm=norm
         )
         plt.title('2D Histogram of meltpool width and length', fontsize=16)
         plt.xlabel('Melt Pool Width (pixels)')
