@@ -24,6 +24,10 @@ def sample_data(filepath, frac=0.0001):
     logging.info(f"Sampling data with fraction: {frac}")
     df_sampled = df.sample(frac=frac)
 
+    # log the columns and their data types
+    logging.info(f"Columns: {df_sampled.columns}")
+    logging.info(f"Data types: {df_sampled.dtypes}")
+
     # Save the sampled data to a new parquet file
     new_filepath = os.path.splitext(filepath)[0] + f"_sampled_{frac}.parquet"
     logging.info(f"Saving sampled data to: {new_filepath}")
