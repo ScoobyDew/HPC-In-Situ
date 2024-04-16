@@ -145,7 +145,7 @@ def main():
         logging.info(f"Successfully read parquet file: {filepath}")
         logging.info(f"Columns: {df.columns}")
     except Exception as e:
-        logging.error(f"Error reading parquet file: {filepath}")
+        logging.error(f"Error reading parquet file: {filepath}, {e}")
         return
 
     # Add derived parameters
@@ -154,7 +154,7 @@ def main():
         df = add_normenthalpy(df)
         logging.info("Successfully added normalised enthalpy")
     except Exception as e:
-        logging.error("Error adding normalised enthalpy")
+        logging.error("Error adding normalised enthalpy: {e}")
         return
 
     try:
@@ -162,7 +162,7 @@ def main():
         df = add_NVED(df)
         logging.info("Successfully added normalised volumetric energy density")
     except Exception as e:
-        logging.error("Error adding normalised volumetric energy density")
+        logging.error(f"Error adding normalised volumetric energy density: {e}")
         return
 
     try:
@@ -171,7 +171,7 @@ def main():
         df.to_parquet('/mnt/parscratch/users/eia19od/combined_derived.parquet')
         logging.info("Successfully saved DataFrame as a parquet file")
     except Exception as e:
-        logging.error("Error saving DataFrame as a parquet file")
+        logging.error(f"Error saving DataFrame as a parquet file: {e}")
 
     finally:
         logging.info("Processing complete")
