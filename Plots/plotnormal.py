@@ -36,6 +36,7 @@ def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap, fig):
                 verticalalignment='top', fontsize=10, color='red')
 
 def main():
+    logging.info("Starting processing")
     filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
     filters = [
         ('pyro2', '>', 0),
