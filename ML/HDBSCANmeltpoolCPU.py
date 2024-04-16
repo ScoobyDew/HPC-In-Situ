@@ -6,7 +6,7 @@ import dask.dataframe as dd
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from hdbscan import HDBSCAN  # Corrected import
+from sklearn.cluster import HDBSCAN  # Corrected import
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='hdbscan_clustering_cpu.log', filemode='w',
