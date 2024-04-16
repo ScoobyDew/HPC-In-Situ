@@ -64,7 +64,9 @@ def main():
         ('Normalised Enthalpy', '>', 0),
         ('E*0', '>', 0)
     ]
+    logging.info("Starting processing")
     df = dd.read_parquet(filepath, filters=filters).compute()
+    logging.info("Read parquet file")
 
     plot_vars = [
         (df, 'mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity'),
@@ -77,8 +79,9 @@ def main():
     pool = mp.Pool(processes=mp.cpu_count())
 
     # Map plot_subplot function to each set of arguments
+    logging.info("Starting plotting with multiprocessing")
     pool.map(plot_subplot, plot_vars)
-
+    logging.info("Finished plotting")
     pool.close()
     pool.join()
     logging.info("Processing Finished")
