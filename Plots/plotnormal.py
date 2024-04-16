@@ -3,23 +3,23 @@ import os
 import numpy as np
 import dask.dataframe as dd
 import matplotlib.pyplot as plt
-from matplotlib.colors import LogNorm
-from scipy.stats import pearsonr
+import seaborn as sns
 import time
-import multiprocessing as mp
+import pickle
+from matplotlib.colors import LogNorm, Normalize
+from matplotlib.ticker import MaxNLocator
+from scipy.stats import pearsonr
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='plot.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-def plot_subplot(args):
-    df, x_var, y_var, x_label, y_label, title = args
-    # Create the plot with non-interactive backend to prevent it from trying to show in an HPC environment
-    plt.switch_backend('agg')
-    fig, ax = plt.subplots(figsize=(8, 8))
+def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap):
+    """Function to plot each subplot with histogram, regression, and annotations."""
+
 
     # Plotting histogram
-    h = ax.hist2d(df[x_var], df[y_var], bins=50, norm=LogNorm(), cmap='cividis')
+    h = ax.hist2d(df[x_var], df[y_var], bins=50, norm=LogNorm(), cmap=cmap)
     cbar = fig.colorbar(h[3], ax=ax)
     cbar.set_label('Counts')
     ax.set_title(title)
@@ -41,21 +41,6 @@ def plot_subplot(args):
     ax.annotate(f'{line_eq}\n{corr_info}', xy=(0.05, 0.95), xycoords='axes fraction',
                 verticalalignment='top', fontsize=10, color='red')
 
-    # Removing problematic characters and replace spaces
-    safe_title = title.replace(' ', '_').replace('$', '').replace('\\', '')
-
-    # Prepare the full filename string
-    timestamp = time.strftime('%Y_%m_%d_%H_%M_%S')
-    filename = f"images/{safe_title}_{timestamp}.png"
-
-    # Ensure the 'images' directory exists
-    if not os.path.exists("images"):
-        os.mkdir("images")
-
-    # Save the plot
-    fig.savefig(filename, dpi=300)
-    plt.close(fig)
-
 def main():
     filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
     filters = [
@@ -64,26 +49,31 @@ def main():
         ('Normalised Enthalpy', '>', 0),
         ('E*0', '>', 0)
     ]
-    logging.info("Starting processing")
     df = dd.read_parquet(filepath, filters=filters).compute()
-    logging.info("Read parquet file")
 
+    fig, axs = plt.subplots(2, 2, figsize=(15, 15))
+
+    # Define plot variables
     plot_vars = [
-        (df, 'mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity'),
-        (df, 'pyro2', 'Normalised Enthalpy', 'Pyrometer Voltage (mV)', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage'),
-        (df, 'mp_intensity', 'E*0', 'Meltpool Pixel Count', '$E_0^*$', '$E_0^*$ vs Meltpool Pixel Count'),
-        (df, 'pyro2', 'E*0', 'Pyrometer Voltage (mV)', '$E_0^*$', '$E_0^*$ vs Pyrometer Voltage')
+        ('mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity',
+         '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'),
+        ('pyro2', 'Normalised Enthalpy', 'Pyrometer Voltage (mV)',
+         '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage', 'cividis'),
+        ('mp_intensity', 'E*0', 'Meltpool Pixel Count', '$E_0^*$', '$E_0^*$ vs Meltpool Pixel Count', 'viridis'),
+        ('pyro2', 'E*0', 'Pyrometer Voltage (mV)', '$E_0^*$', '$E_0^*$ vs Pyrometer Voltage', 'viridis')
     ]
 
-    # Set up a pool of processes
-    pool = mp.Pool(processes=mp.cpu_count())
+    # Create each subplot individually
+    for ax, var_details in zip(axs.flat, plot_vars):
+        plot_subplot(df, *var_details, ax)
 
-    # Map plot_subplot function to each set of arguments
-    logging.info("Starting plotting with multiprocessing")
-    pool.map(plot_subplot, plot_vars)
-    logging.info("Finished plotting")
-    pool.close()
-    pool.join()
+    fig.suptitle('2D Histograms of Insitu Parameters and Associated Dimensionless Quantities')
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+
+    if not os.path.exists("images"):
+        os.mkdir("images")
+    plt.savefig(f"images/2d_hist_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png", dpi=500)
+    logging.info("Plot saved as PNG.")
     logging.info("Processing Finished")
 
 if __name__ == '__main__':
