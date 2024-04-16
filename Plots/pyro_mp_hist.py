@@ -27,8 +27,8 @@ def main():
         df_pd = df.compute()
         logging.info("Converted to pandas dataframe")
 
-        x = df_pd['pyro2']
-        y = df_pd['mp_intensity']
+        x = df_pd['mp_intensity']
+        y = df_pd['pyro2']
 
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -42,14 +42,15 @@ def main():
         y_bins = np.arange(y_min, y_max + 1, 1)
 
         # Using matplotlib's hist2d function with the cividis colormap
-        h = ax.hist2d(x, y, bins=[x_bins, y_bins], norm=LogNorm(), cmap='cividis')
+        h = ax.hist2d(y, x, bins=[y_bins, x_bins], norm=LogNorm(), cmap='cividis')
+
+        # Set xlim
+        ax.set_ylim(0, 150000)
 
         # Adding color bar
         cbar = fig.colorbar(h[3], ax=ax)
         cbar.set_label('Counts')
 
-        # Set xlim
-        ax.set_xlim(0, 125000)
 
         # Adding titles and labels
         ax.set_title('2D Histogram of Meltpool Intensity and Pyrometer Voltage')
@@ -68,15 +69,9 @@ def main():
         plt.savefig(f"images/density_contour_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png")
         logging.info("Plot saved as PNG.")
 
-        # Save the plot data as a pickle file
-        plot_data = {
-            'x': x,
-            'y': y,
-            'histogram': h
-        }
-
-        with open(f"images/density_contour_{time.strftime('%Y_%m_%d_%H_%M_%S')}.pkl", 'wb') as f:
-            pickle.dump(plot_data, f)
+        # Save the plot as a pickle file
+        with open(f"images/density_contour_{time.strftime('%Y_%m_%d %H_%M_%S')}.pkl", 'wb') as f:
+            pickle.dump(plt.gcf(), f)
         logging.info("Plot saved as pickle.")
 
     except Exception as e:
