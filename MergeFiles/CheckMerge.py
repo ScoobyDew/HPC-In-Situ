@@ -8,7 +8,10 @@ import pandas as pd
 import logging
 from multiprocessing import Pool
 import dask.dataframe as dd
+client = Client(memory_limit='2GB')
 
+# Import a garbage collector
+import gc
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')

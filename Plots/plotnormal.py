@@ -1,4 +1,3 @@
-import logging
 import os
 import numpy as np
 import dask.dataframe as dd
@@ -6,13 +5,16 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
 from scipy.stats import pearsonr
 import time
+import gc
+import logging
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='plot.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, filename='plot.log', filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap, fig):
     """Function to plot each subplot with histogram, regression, and annotations."""
-    # Plotting histogram
+    plt.switch_backend('agg')  # Use non-interactive backend suitable for scripts
     h = ax.hist2d(df[x_var], df[y_var], bins=50, norm=LogNorm(), cmap=cmap)
     cbar = fig.colorbar(h[3], ax=ax)
     cbar.set_label('Counts')
@@ -35,40 +37,38 @@ def plot_subplot(df, x_var, y_var, x_label, y_label, title, ax, cmap, fig):
     ax.annotate(f'{line_eq}\n{corr_info}', xy=(0.05, 0.95), xycoords='axes fraction',
                 verticalalignment='top', fontsize=10, color='red')
 
+def load_data(filepath, columns):
+    """Load only specified columns to conserve memory."""
+    df = dd.read_parquet(filepath, columns=columns)
+    return df.compute()  # Convert to Pandas DataFrame for easier plotting
+
 def main():
-    logging.info("Starting processing")
     filepath = '/mnt/parscratch/users/eia19od/combined_derived.parquet'
-    filters = [
-        ('pyro2', '>', 0),
-        ('mp_intensity', '>', 0),
-        ('Normalised Enthalpy', '>', 0),
-        ('E*0', '>', 0)
+    plot_vars = [
+        (['mp_intensity', 'Normalised Enthalpy'], 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'),
+        (['pyro2', 'Normalised Enthalpy'], 'Pyrometer Voltage (mV)', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage', 'cividis'),
+        (['mp_intensity', 'E*0'], 'Meltpool Pixel Count', '$E_0^*$', '$E_0^*$ vs Meltpool Pixel Count', 'viridis'),
+        (['pyro2', 'E*0'], 'Pyrometer Voltage (mV)', '$E_0^*$', '$E_0^*$ vs Pyrometer Voltage', 'viridis')
     ]
-    df = dd.read_parquet(filepath, filters=filters).compute()
 
     fig, axs = plt.subplots(2, 2, figsize=(15, 15))
 
-    # Define plot variables
-    plot_vars = [
-        ('mp_intensity', 'Normalised Enthalpy', 'Meltpool Intensity', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Meltpool Intensity', 'cividis'),
-        ('pyro2', 'Normalised Enthalpy', 'Pyrometer Voltage (mV)', '$\\frac{\\Delta{H}}{h}$', '$\\frac{\\Delta{H}}{h}$ vs Pyrometer Voltage', 'cividis'),
-        ('mp_intensity', 'E*0', 'Meltpool Pixel Count', '$E_0^*$', '$E_0^*$ vs Meltpool Pixel Count', 'viridis'),
-        ('pyro2', 'E*0', 'Pyrometer Voltage (mV)', '$E_0^*$', '$E_0^*$ vs Pyrometer Voltage', 'viridis')
-    ]
-
-    # Create each subplot individually
-    for ax, var_details in zip(axs.flat, plot_vars):
-        plot_subplot(df, *var_details, ax, fig)  # Pass fig as well
+    for ax, (columns, x_label, y_label, title, cmap) in zip(axs.flat, plot_vars):
+        df = load_data(filepath, columns)
+        plot_subplot(df, columns[0], columns[1], x_label, y_label, title, ax, cmap, fig)
+        del df  # Delete the dataframe to free memory
+        gc.collect()  # Collect garbage to free memory
 
     fig.suptitle('2D Histograms of Insitu Parameters and Associated Dimensionless Quantities')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
 
+    # Save the plot
     if not os.path.exists("images"):
         os.mkdir("images")
     plt.savefig(f"images/2d_hist_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png", dpi=500)
+    plt.close(fig)  # Close the figure to free memory
     logging.info("Plot saved as PNG.")
     logging.info("Processing Finished")
 
 if __name__ == '__main__':
     main()
-
