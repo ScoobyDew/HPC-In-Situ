@@ -24,12 +24,13 @@ def main():
         df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
         logging.info(f"Successfully read parquet file: {filepath}")
 
-        # Replace all zero values with NaN
-        df = df.replace(0, np.nan)
+        df = df.replace(0, np.nan)  # This should be fine as long as it supports Dask
 
-        # Reset index to ensure uniqueness
-        logging.info("Resetting index to ensure it is unique.")
-        df = df.reset_index(drop=True).compute()
+        # Resetting index in Dask, then computing
+        df = df.reset_index(drop=True)
+
+        # Make sure df is still a Dask DataFrame before computing
+        logging.info(f"DataFrame type before compute: {type(df)}")
 
         # Convert to pandas dataframe
         df_pd = df.compute()
