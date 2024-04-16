@@ -7,6 +7,7 @@ import time
 import pickle
 from matplotlib.colors import LogNorm, Normalize
 from matplotlib.ticker import MaxNLocator
+import numpy as np
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='hist.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
