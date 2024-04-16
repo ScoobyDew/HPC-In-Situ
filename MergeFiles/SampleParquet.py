@@ -31,7 +31,7 @@ def sample_data(filepath, frac=0.0001):
     # Save the sampled data to a new parquet file
     new_filepath = '/mnt/parscratch/users/eia19od/combined_sampled.parquet'
     logging.info(f"Saving sampled data to: {new_filepath}")
-    df_sampled.to_parquet(new_filepath, engine='pyarrow', index=False)
+    df_sampled.to_parquet(new_filepath, engine='pyarrow', write_index=False)
     logging.info(f"Saved sampled data to: {new_filepath}")
 
 def main():
