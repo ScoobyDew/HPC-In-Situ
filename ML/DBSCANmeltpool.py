@@ -20,7 +20,7 @@ def main():
         logging.info("Successfully read the parquet file.")
 
         # Sample to reduce the size of the dataset to 0.01% of the original size
-        df = df.sample(frac=0.001)
+        df = df.sample(frac=0.00001)
 
         # Select the columns to be used for clustering
         logging.info("Selecting columns for clustering.")
