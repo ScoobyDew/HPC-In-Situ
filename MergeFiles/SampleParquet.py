@@ -22,16 +22,17 @@ def sample_data(filepath, frac=0.0001):
     logging.info(f"Read parquet file: {filepath}")
 
     logging.info(f"Sampling data with fraction: {frac}")
-    df_sampled = df.sample(frac=frac)
+    df_sampled = df.sample(frac=frac).compute()
 
     # log the columns and their data types
     logging.info(f"Columns: {df_sampled.columns}")
     logging.info(f"Data types: {df_sampled.dtypes}")
 
+
     # Save the sampled data to a new parquet file
     new_filepath = '/mnt/parscratch/users/eia19od/combined_sampled.parquet'
     logging.info(f"Saving sampled data to: {new_filepath}")
-    df_sampled.to_parquet(new_filepath, engine='pyarrow', write_index=False)
+    df_sampled.to_parquet(new_filepath, engine='pyarrow', index=False)
     logging.info(f"Saved sampled data to: {new_filepath}")
 
 def main():
