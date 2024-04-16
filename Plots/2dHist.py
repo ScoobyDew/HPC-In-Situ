@@ -31,17 +31,25 @@ def main():
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(10, 8))
 
+        # Determine the range of data
+        x_min, x_max = x.min() - 0.5, x.max() + 0.5
+        y_min, y_max = y.min() - 0.5, y.max() + 0.5
+
+        # Define bins such that each integer value falls into its own bin
+        x_bins = np.arange(x_min, x_max + 1, 1)
+        y_bins = np.arange(y_min, y_max + 1, 1)
+
         # Using matplotlib's hist2d function with the cividis colormap
-        h = ax.hist2d(x, y, bins=50, norm=LogNorm(), cmap='cividis')
+        h = ax.hist2d(x, y, bins=[x_bins, y_bins], norm=LogNorm(), cmap='cividis')
 
         # Adding color bar
         cbar = fig.colorbar(h[3], ax=ax)
         cbar.set_label('Counts')
 
         # Adding titles and labels
-        ax.set_title('2D Histogram of X and Y with Log Scaling and Cividis Colormap')
-        ax.set_xlabel('X values')
-        ax.set_ylabel('Y values')
+        ax.set_title('2D Histogram of Melt Pool Width and Length with Log Scaling and Cividis Colormap')
+        ax.set_xlabel('Melt Pool Width')
+        ax.set_ylabel('Melt Pool Length')
 
 
 
