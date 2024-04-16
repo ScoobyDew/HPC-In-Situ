@@ -16,7 +16,8 @@
 # Source the Conda initialization script
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/Plots/NormalSingle.py
+python /users/eia19od/in_situ/HPC-In-Situ/Plots/plotnormal.py
+
 date
 seff $SLURM_JOBID
 
