@@ -7,6 +7,17 @@ This Script is used to add derived parameters to the combined DataFrame includin
 import os
 import pandas as pd
 import logging
+import time
+import numpy as np
+import dask.dataframe as dd
+import matplotlib.pyplot as plt
+
+# Setup logging
+logging.basicConfig(level=logging.INFO, filename='add_derived.log',
+                    filemode='w',
+                    format='%(asctime)s - %(levelname)s - %(message)s'
+                    )
+
 
 def add_normenthalpy(dd):
     """
@@ -57,8 +68,12 @@ def add_normenthalpy(dd):
     hs = rho * Cp * T_sol
 
     # Calculate the normalised enthalpy
-    dd['Normalised Enthalpy'] = (n * dd['Power (W)']) / (hs * (a * dd['Laser Speed (mm/s)'] * (dd['Beam radius (um)'] / 1000) ** 3)
+    dd['Normalised Enthalpy'] =(n * dd['Power (W)']) /\
+                               (hs * (a * dd['Laser Speed (mm/s)'] * (dd['Beam radius (um)'] / 1000) ** 3)
 
-    logging.info("Normalised Enthalpy added to DataFrame")
+    logging.info("Added Normalised Enthalpy to the DataFrame")
 
     return dd
+
+def add_NED(dd):
+
