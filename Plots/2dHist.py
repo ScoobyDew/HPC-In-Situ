@@ -25,26 +25,25 @@ def main():
         df_pd = df.compute()
         logging.info("Converted to pandas dataframe")
 
-        # Prepare the normalization
-        norm = LogNorm(vmin=1, vmax=7.1e6)
+        x = df_pd['mp_width']
+        y = df_pd['mp_length']
 
-        # Plotting
-        plt.figure(figsize=(10, 8))
-        sns.histplot(
-            data=df_pd,
-            x='mp_width',
-            y='mp_length',
-            cmap='cividis',
-            binwidth=(1, 1),
-            cbar_kws={
-                'ticks': MaxNLocator(2),
-                'format': '%.e'
-            },
-            norm=norm
-        )
-        plt.title('2D Histogram of meltpool width and length', fontsize=16)
-        plt.xlabel('Melt Pool Width (pixels)')
-        plt.ylabel('Melt Pool Length (pixels)')
+        # Create figure and axis
+        fig, ax = plt.subplots(figsize=(10, 8))
+
+        # Using matplotlib's hist2d function with the cividis colormap
+        h = ax.hist2d(x, y, bins=50, norm=LogNorm(), cmap='cividis')
+
+        # Adding color bar
+        cbar = fig.colorbar(h[3], ax=ax)
+        cbar.set_label('Counts')
+
+        # Adding titles and labels
+        ax.set_title('2D Histogram of X and Y with Log Scaling and Cividis Colormap')
+        ax.set_xlabel('X values')
+        ax.set_ylabel('Y values')
+
+
 
         # Ensure the 'images' directory exists
         if not os.path.exists("images"):
