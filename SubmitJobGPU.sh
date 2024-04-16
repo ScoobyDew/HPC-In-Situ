@@ -13,8 +13,8 @@
 #SBATCH --gres=gpu:2       # 4 GPUs for job
 #SBATCH --mem=256G
 #SBATCH --time=00:30:00
-#SBATCH --output=result.log
-#SBATCH --error=error.log
+#SBATCH --output=resultGPU.log
+#SBATCH --error=errorGPU.log
 
 # Source the Conda initialization script
 module load CUDA/12.0.0
