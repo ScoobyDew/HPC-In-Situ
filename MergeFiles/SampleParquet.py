@@ -17,6 +17,9 @@ def sample_data(filepath, frac=0.0001):
     logging.info(f"Sampling data with fraction: {frac}")
     df_sampled = df.sample(frac=frac).compute()  # Computing to convert to Pandas DataFrame
 
+    # Repartition the data to a single partition
+    df_sampled = df_sampled.repartition(npartitions=1)
+    logging.info(f"Repartitioned data to a single partition")
     # Ensure the type after compute() is indeed a Pandas DataFrame
     if isinstance(df_sampled, pd.DataFrame):
         logging.info("Confirmed sampled data is a Pandas DataFrame")
