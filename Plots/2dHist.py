@@ -1,42 +1,30 @@
 import logging
 import os
 import dask.dataframe as dd
-import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import numpy as np
 import time
 import pickle
 from matplotlib.colors import LogNorm
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='app.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Find time at the start of the processing (date and time)
-start_time = time.strftime('%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.INFO, filename='hist.log', filemode='w', format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
     logging.info("Starting processing")
     filepath = '/mnt/parscratch/users/eia19od/combined_params.parquet'
 
     try:
-        # Read the merged parquet file using dask
-        df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'])
+        # Read the merged parquet file using dask, filtering out zeros in 'mp_width' and 'mp_length'
+        filters = [('mp_width', '>', 0), ('mp_length', '>', 0)]
+        df = dd.read_parquet(filepath, columns=['mp_width', 'mp_length'], filters=filters)
         logging.info(f"Successfully read parquet file: {filepath}")
 
-        df = df.replace(0, np.nan)  # This should be fine as long as it supports Dask
-
-        # Resetting index in Dask, then computing
-        df = df.reset_index(drop=True)
-
-        # Make sure df is still a Dask DataFrame before computing
-        logging.info(f"DataFrame type before compute: {type(df)}")
-
-        # Convert to pandas dataframe
+        # Convert Dask DataFrame to Pandas DataFrame
         df_pd = df.compute()
         logging.info("Converted to pandas dataframe")
 
-        # Plotting the data
+        # Since we have applied the filter at read time, we can directly proceed to plotting without further data cleaning
         plt.figure(figsize=(10, 8))
         sns.histplot(
             data=df_pd,
@@ -56,11 +44,11 @@ def main():
             os.mkdir("images")
 
         # Save the plot as PNG
-        plt.savefig(f"images/density_contour_{start_time}.png")
+        plt.savefig(f"images/density_contour_{time.strftime('%Y-%m-%d %H:%M:%S')}.png")
         logging.info("Plot saved as PNG.")
 
         # Save the plot as a pickle file
-        with open(f"images/density_contour_{start_time}.pkl", 'wb') as f:
+        with open(f"images/density_contour_{time.strftime('%Y-%m-%d %H:%M:%S')}.pkl", 'wb') as f:
             pickle.dump(plt.gcf(), f)
         logging.info("Plot saved as pickle.")
 
