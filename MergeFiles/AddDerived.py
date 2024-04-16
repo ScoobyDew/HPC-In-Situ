@@ -35,10 +35,30 @@ def add_normenthalpy(dd):
         - $a$ is 3.25 mm^2/s
         - $rho$ is 0.008395 g/mm^3
         - $C_p$ is 0.43 J/gK
-        - $T_{\text {sol }}$ is assumed to be 1300
+        - $T_{\text {sol }}$ is assumed to be 1260 C
+
 
     Parameters:
     - dd: Dask DataFrame
+        Contains the columns:
+        - 'Power (W)'
+        - 'Laser Speed (mm/s)'
+        - 'Beam radius (um)'
     """
-    df['norm_enthalpy'] = df['enthalpy'] / df['mass']
-    return df
+
+    # Constants
+    n = 0.3
+    a = 3.25
+    rho = 0.008395
+    Cp = 0.43
+    T_sol = 1260
+
+    # Calculate the specific enthalpy
+    hs = rho * Cp * T_sol
+
+    # Calculate the normalised enthalpy
+    dd['Normalised Enthalpy'] = (n * dd['Power (W)']) / (hs * (a * dd['Laser Speed (mm/s)'] * (dd['Beam radius (um)'] / 1000) ** 3)
+
+    logging.info("Normalised Enthalpy added to DataFrame")
+
+    return dd
