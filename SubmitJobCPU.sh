@@ -9,7 +9,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=240G
-#SBATCH --time=00:15:00
+#SBATCH --time=00:45:00
 #SBATCH --output=result_%j.log
 #SBATCH --error=error_%j.log
 
