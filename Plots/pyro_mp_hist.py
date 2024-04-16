@@ -27,8 +27,8 @@ def main():
         df_pd = df.compute()
         logging.info("Converted to pandas dataframe")
 
-        x = df_pd['mp_intensity']
-        y = df_pd['pyro2']
+        x = df_pd['pyro2']
+        y = df_pd['mp_intensity']
 
         # Create figure and axis
         fig, ax = plt.subplots(figsize=(10, 8))
@@ -48,6 +48,9 @@ def main():
         cbar = fig.colorbar(h[3], ax=ax)
         cbar.set_label('Counts')
 
+        # Set xlim
+        ax.set_xlim(0, 125000)
+
         # Adding titles and labels
         ax.set_title('2D Histogram of Meltpool Intensity and Pyrometer Voltage')
         ax.set_xlabel('Meltpool Intensity')
@@ -65,9 +68,15 @@ def main():
         plt.savefig(f"images/density_contour_{time.strftime('%Y_%m_%d_%H_%M_%S')}.png")
         logging.info("Plot saved as PNG.")
 
-        # Save the plot as a pickle file
-        with open(f"images/density_contour_{time.strftime('%Y_%m_%d %H_%M_%S')}.pkl", 'wb') as f:
-            pickle.dump(plt.gcf(), f)
+        # Save the plot data as a pickle file
+        plot_data = {
+            'x': x,
+            'y': y,
+            'histogram': h
+        }
+
+        with open(f"images/density_contour_{time.strftime('%Y_%m_%d_%H_%M_%S')}.pkl", 'wb') as f:
+            pickle.dump(plot_data, f)
         logging.info("Plot saved as pickle.")
 
     except Exception as e:
