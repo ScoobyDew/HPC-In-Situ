@@ -52,7 +52,32 @@ def main():
     histogram_data.to_csv(f'/mnt/parscratch/users/eia19od/histogram_data_{time.strftime("%Y%m%d%H%M%S")}.csv')
     logging.info("Histogram data saved successfully.")
 
-    logging.info(f"Total processing time: {time.time() - time_start} seconds.")
+    # Compute the 2D histogram
+    logging.info("Computing 2D histogram.")
+    histogram, x_edges, y_edges = np.histogram2d(
+        X['mp_width'], X['mp_length'],
+        bins=(np.arange(X['mp_width'].min(), X['mp_width'].max() + 1),
+              np.arange(X['mp_length'].min(), X['mp_length'].max() + 1)))
 
+    # Calculate the density of datapoints
+    bin_area = 1  # Since the bin size is 1 in both dimensions
+    total_datapoints = len(X)
+    density = (histogram / total_datapoints) * bin_area
+
+    # Create a DataFrame with mp_length, mp_width and density
+    mp_width, mp_length = np.meshgrid(x_edges[:-1], y_edges[
+                                                    :-1])  # Use the bin edges to get the unique values of mp_width and mp_length
+    histogram_data = pd.DataFrame({
+        'mp_width': mp_width.ravel(),
+        'mp_length': mp_length.ravel(),
+        'density': density.ravel()
+    })
+
+    # Save histogram data to CSV
+    histogram_data.to_csv(f'/mnt/parscratch/users/eia19od/histogram_data_{time.strftime("%Y%m%d%H%M%S")}.csv',
+                          index=False)
+    logging.info("Histogram data saved successfully.")
+
+    logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 if __name__ == "__main__":
     main()
