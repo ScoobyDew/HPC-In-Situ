@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-
 
 main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
 labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
+parameters_path = '/mnt/parscratch/users/eia19od/merged_data.xlsx'
 
 logging.info("Reading the main and labeled datasets using Dask.")
 main_data = dd.read_parquet(main_data_path)
@@ -33,6 +34,11 @@ labeled_data = dd.read_csv(labeled_data_path)
 # Print column names and data types from the labeled dataset
 logging.info("Column names and data types from the labeled dataset:")
 logging.info(f"Columns: {labeled_data.columns}")
+
+processing_parameters = dd.read_excel(parameters_path)
+
+# Merge ['Normalised Enthalpy', 'Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'
+labeled_data = dd.merge(labeled_data, processing_parameters, on=['Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'], how='left')
 
 logging.info("Datasets read successfully.")
 
