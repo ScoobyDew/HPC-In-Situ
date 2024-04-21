@@ -1,7 +1,9 @@
 # Load both the main dataset and the labeled dataset
 import pandas as pd
 import logging
+import time
 
+time_start = time.time()
 # Set up logging
 logging.basicConfig(level=logging.INFO, filename='thresh2.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -11,6 +13,11 @@ labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
 
 logging.info("Reading the main and labeled datasets.")
 main_data = pd.read_parquet(main_data_path)
+
+# Make mp_length and mp_width integer columns
+main_data['mp_length'] = main_data['mp_length'].astype(int)
+main_data['mp_width'] = main_data['mp_width'].astype(int)
+
 labeled_data = pd.read_csv(labeled_data_path)
 logging.info("Datasets read successfully.")
 
@@ -36,3 +43,4 @@ logging.info("Violin plot created successfully.")
 output_path = '/mnt/parscratch/users/eia19od/violin_plot.png'
 plt.savefig(output_path)
 logging.info(f"Violin plot saved successfully at {output_path}.")
+logging.info(f"Total processing time: {time.time() - time_start} seconds.")
