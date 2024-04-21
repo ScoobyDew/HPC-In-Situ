@@ -51,30 +51,28 @@ computed_data = final_merged_data.compute()
 # Plotting
 logging.info("Plotting the violin plot.")
 
-# Filter the data
-filtered_data = computed_data[computed_data['RegionLabel'].isin([1, 2, 3])]
+# Ensure RegionLabel is an integer if it's supposed to be
+filtered_data['RegionLabel'] = filtered_data['RegionLabel'].astype(int)
 
 # Create a color palette
 palette = {1: 'blue', 2: 'green', 3: 'yellow'}
 
-# Create the violin plot
+# Create the violin plot for Normalized Enthalpy
 plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=filtered_data, palette=palette)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region')
-plt.ylabel(f'$\\frac{{\\Delta H}}{{h_s}}$')
+plt.ylabel(r'$\frac{\Delta H}{h_s}$')  # Correct LaTeX formatting
 plt.savefig('/mnt/parscratch/users/eia19od/NENTH_violin_plot.png')
 
+# Create the violin plot for E*0
 plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='E*0', data=filtered_data, palette=palette)
-plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+plt.title('Violin Plot of E*0 by Region Label')
 plt.xlabel('Region')
-plt.ylabel(f'$\\E{{*}}_0$')
+plt.ylabel(r'$E^{*}_0$')  # Correct LaTeX formatting
 plt.savefig('/mnt/parscratch/users/eia19od/E0_violin_plot.png')
 
-
-logging.info("Violin plot created and saved successfully.")
-
-logging.info(f"Total processing time: {time.time() - time_start} seconds.")
-
+# Logging completion
+logging.info("Violin plots created and saved successfully.")
 logging.info(f"Total processing time: {time.time() - time_start} seconds.")
