@@ -19,36 +19,31 @@ logging.info("Reading the main and labeled datasets using Dask.")
 main_data = dd.read_parquet(main_data_path)
 labeled_data = dd.read_csv(labeled_data_path)
 
-# Inspecting columns
-logging.info(f"Main data columns: {main_data.columns.tolist()}")
-logging.info(f"Labeled data columns: {labeled_data.columns.tolist()}")
+# Ensure 'mp_length' and 'mp_width' are integer for merging consistency
+main_data['mp_length'] = main_data['mp_length'].astype(int)
+main_data['mp_width'] = main_data['mp_width'].astype(int)
+labeled_data['mp_length'] = labeled_data['mp_length'].astype(int)
+labeled_data['mp_width'] = labeled_data['mp_width'].astype(int)
 
-# Ensure 'Part Number' is present and correctly typed
-if 'Part Number' not in main_data.columns:
-    logging.error("Part Number column missing in main data.")
-    raise KeyError("Part Number column missing in main data.")
-if 'Part Number' not in labeled_data.columns:
-    logging.error("Part Number column missing in labeled data.")
-    raise KeyError("Part Number column missing in labeled data.")
+# Merge main data with labeled data on 'mp_width' and 'mp_length'
+logging.info("Merging main data with labeled data.")
+merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], how='left')
 
-# Using pandas to read Excel file (Processing parameters)
+# Use pandas to read Excel file (Processing parameters)
+logging.info("Reading processing parameters.")
 processing_parameters = pd.read_excel(parameters_path)
-logging.info("Parameters read successfully with pandas.")
-
-# Convert pandas DataFrame to Dask DataFrame
 processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
 
-# Merge the datasets on 'Part Number'
-logging.info("Merging the datasets.")
-merged_data = dd.merge(main_data, processing_parameters, on='Part Number', how='left')
-final_merged_data = dd.merge(merged_data, labeled_data, on=['mp_length', 'mp_width'], how='left')
-logging.info("Datasets merged successfully.")
+# Merge processing parameters with merged_data on 'Part Number'
+logging.info("Merging with processing parameters.")
+final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
 
-# Compute necessary part for plotting
+# Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
 
 # Plotting
+logging.info("Plotting the violin plot.")
 plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='Normalized Enthalpy', data=computed_data)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
@@ -56,4 +51,5 @@ plt.xlabel('Region Label')
 plt.ylabel('Normalized Enthalpy')
 plt.savefig('/mnt/parscratch/users/eia19od/violin_plot.png')
 logging.info("Violin plot created and saved successfully.")
+
 logging.info(f"Total processing time: {time.time() - time_start} seconds.")
