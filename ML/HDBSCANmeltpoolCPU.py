@@ -54,7 +54,8 @@ def main():
             y='mp_length',
             hue='cluster',
             palette='viridis',
-            bins=[np.arange(0, 71), np.arange(0, 66)],  # 70 bins for x and 65 bins for y
+            binwidth=[1,1],
+            binrange=[0,70],[0,65],
             kde=False,
             stat="count",  # Use 'count' to show the number of occurrences in each bin
             cbar=True,  # Optional: Add a color bar to indicate counts
