@@ -43,6 +43,9 @@ def main():
         logging.info("Assigning cluster labels to the DataFrame.")
         X['cluster'] = labels
 
+        # Log the values of the clusters
+        logging.info(f"Cluster values: {X['cluster'].unique()}")
+
         import numpy as np  # Import numpy for creating bin ranges
 
         # Adjust plotting section
@@ -54,7 +57,7 @@ def main():
             y='mp_length',
             hue='cluster',
             palette='viridis',
-            binwidth=1,
+            binwidth=(1,1),
             kde=False,
             stat="count",  # Use 'count' to show the number of occurrences in each bin
             cbar=True,  # Optional: Add a color bar to indicate counts
