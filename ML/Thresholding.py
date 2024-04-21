@@ -22,7 +22,7 @@ def main():
     logging.info("Successfully read the parquet file.")
 
     # Sample to reduce the size of the dataset
-    df = df.sample(frac=0.00001)
+    # df = df.sample(frac=0.00001)
 
     # Select the columns to be used
     logging.info("Selecting columns.")
