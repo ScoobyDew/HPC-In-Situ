@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO, filename='dbscancpu.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
+    time_start = time.time()
     logging.info("Starting processing...")
     # Load the dataset
     df = dd.read_parquet('/mnt/parscratch/users/eia19od/combined_params.parquet',
@@ -40,7 +41,7 @@ def main():
 
     # Perform DBSCAN clustering
     logging.info("Performing DBSCAN clustering.")
-    cluster_model = DBSCAN(eps=1, min_samples=1e4).fit(X)
+    cluster_model = DBSCAN(eps=1, min_samples=1000).fit(X)
 
     logging.info("Clustering complete.")
 
@@ -76,7 +77,7 @@ def main():
     plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y%m%d%H%M%S")}.png')
     plt.close()
     logging.info("Plot saved successfully.")
-
+    logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
 if __name__ == "__main__":
     main()
