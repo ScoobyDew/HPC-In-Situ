@@ -20,6 +20,9 @@ main_data = dd.read_parquet(main_data_path)
 main_data['mp_length'] = main_data['mp_length'].astype(int)
 main_data['mp_width'] = main_data['mp_width'].astype(int)
 
+# Downsample the data to .1% of the original size
+main_data = main_data.sample(frac=0.001)
+
 labeled_data = dd.read_csv(labeled_data_path)
 logging.info("Datasets read successfully.")
 
