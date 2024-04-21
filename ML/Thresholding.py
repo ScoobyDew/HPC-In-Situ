@@ -46,9 +46,9 @@ def main():
 
     # Flatten the arrays and create a DataFrame
     histogram_data = pd.DataFrame({
-        'mp_width': mp_width.ravel(),
-        'mp_length': mp_length.ravel(),
-        'density': density.ravel()
+        'mp_width': mp_width.ravel().astype(int),
+        'mp_length': mp_length.ravel().astype(int),
+        'density': density.ravel().astype(int)
     })
 
     # Save histogram data to CSV
