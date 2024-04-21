@@ -34,7 +34,7 @@ def main():
         logging.info("Performing DBSCAN clustering.")
         clusterer = DBSCAN(
             eps=5,  # Example value; adjust based on domain knowledge and experimentation
-            min_samples=10
+            min_samples=2
         )
         labels = clusterer.fit_predict(X)
         logging.info("Clustering complete.")

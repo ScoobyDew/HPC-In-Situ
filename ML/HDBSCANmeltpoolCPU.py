@@ -43,7 +43,9 @@ def main():
         logging.info("Assigning cluster labels to the DataFrame.")
         X['cluster'] = labels
 
-        # Plotting the data
+        import numpy as np  # Import numpy for creating bin ranges
+
+        # Adjust plotting section
         logging.info("Plotting the cluster distribution.")
         plt.figure(figsize=(10, 8))
         sns.histplot(
@@ -52,17 +54,22 @@ def main():
             y='mp_length',
             hue='cluster',
             palette='viridis',
-            bins=30,  # Adjust based on the range and spread of your data
-            kde=False
+            bins=[np.arange(0, 71), np.arange(0, 66)],  # 70 bins for x and 65 bins for y
+            kde=False,
+            stat="count",  # Use 'count' to show the number of occurrences in each bin
+            cbar=True,  # Optional: Add a color bar to indicate counts
         )
         plt.title('2D Histogram of Meltpool Width and Length by Cluster')
         plt.xlabel('Melt Pool Width')
         plt.ylabel('Melt Pool Length')
         plt.legend(title='Cluster')
         plt.grid(True)
+        plt.xlim(0, 70)  # Set limits for x-axis
+        plt.ylim(0, 65)  # Set limits for y-axis
         plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y-%m-%d-%H%M%S")}.png')
         plt.close()
         logging.info("Plot saved successfully.")
+
 
     except Exception as e:
         logging.error("An error occurred during processing.", exc_info=True)
