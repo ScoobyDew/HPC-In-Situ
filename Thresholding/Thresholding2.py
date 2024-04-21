@@ -32,7 +32,11 @@ merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], ho
 # Use pandas to read Excel file (Processing parameters)
 logging.info("Reading processing parameters.")
 processing_parameters = pd.read_excel(parameters_path)
+processing_parameters['Part Number'] = processing_parameters['Part Number'].astype(str)  # Convert Part Number to string
 processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
+
+# Ensure 'Part Number' is a string in main data for consistency
+merged_data['Part Number'] = merged_data['Part Number'].astype(str)
 
 # Merge processing parameters with merged_data on 'Part Number'
 logging.info("Merging with processing parameters.")
