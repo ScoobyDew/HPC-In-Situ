@@ -40,7 +40,7 @@ def main():
 
     # Perform DBSCAN clustering
     logging.info("Performing DBSCAN clustering.")
-    cluster_model = DBSCAN(eps=.5, min_samples=2).fix(X)
+    cluster_model = DBSCAN(eps=.5, min_samples=2).fit(X)
 
     logging.info("Clustering complete.")
 

@@ -10,8 +10,8 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=120G
 #SBATCH --time=00:45:00
-#SBATCH --output=result_%j.log
-#SBATCH --error=error_%j.log
+#SBATCH --output=result.log
+#SBATCH --error=error.log
 
 # Source the Conda initialization script
 
