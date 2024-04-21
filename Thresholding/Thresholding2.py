@@ -53,18 +53,27 @@ computed_data = final_merged_data.compute()
 filtered_data = computed_data[computed_data['RegionLabel'].isin([1, 2, 3])]
 filtered_data['RegionLabel'] = filtered_data['RegionLabel'].astype(int)
 
-# Create a color palette
+# Ensure RegionLabel is an integer
+filtered_data['RegionLabel'] = filtered_data['RegionLabel'].astype(int)
+
+# Verify and log unique RegionLabel values
+unique_labels = filtered_data['RegionLabel'].unique()
+logging.info(f"Unique Region Labels: {unique_labels}")
+
+# Create a color palette with integer keys matching the RegionLabel data
 palette = {1: 'blue', 2: 'green', 3: 'yellow'}
 
-# Plotting
-logging.info("Plotting the violin plot.")
+# Check if all keys in the palette exist in the data
+if not set(palette.keys()).issubset(set(unique_labels)):
+    missing_keys = set(palette.keys()) - set(unique_labels)
+    raise ValueError(f"The palette dictionary is missing keys: {missing_keys}")
 
 # Create the violin plot for Normalized Enthalpy
 plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=filtered_data, palette=palette)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region')
-plt.ylabel(r'$\frac{\Delta H}{h_s}$')  # Correct LaTeX formatting
+plt.ylabel(r'$\frac{\Delta H}{h_s}$')
 plt.savefig('/mnt/parscratch/users/eia19od/NENTH_violin_plot.png')
 plt.close()
 
@@ -73,10 +82,6 @@ plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='E*0', data=filtered_data, palette=palette)
 plt.title('Violin Plot of E*0 by Region Label')
 plt.xlabel('Region')
-plt.ylabel(r'$E^{*}_0$')  # Correct LaTeX formatting
+plt.ylabel(r'$E^{*}_0$')
 plt.savefig('/mnt/parscratch/users/eia19od/E0_violin_plot.png')
 plt.close()
-
-# Logging completion
-logging.info("Violin plots created and saved successfully.")
-logging.info(f"Total processing time: {time.time() - time_start} seconds.")
