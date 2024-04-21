@@ -4,7 +4,6 @@ import time
 import numpy as np
 import dask.dataframe as dd
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='dbscancpu.log', filemode='w',
@@ -18,9 +17,10 @@ def main():
                          engine='pyarrow', columns=['mp_width', 'mp_length'])
     logging.info("Successfully read the parquet file.")
 
-    # Remove any 0 or negative values
-    logging.info("Removing any 0 or negative values.")
-    df = df[(df['mp_width'] > 0) & (df['mp_length'] > 0)]
+    # Apply robust filtering to remove any 0 or negative values effectively
+    logging.info("Applying robust filtering to remove any 0 or negative values.")
+    df = df[df['mp_width'] > 0]
+    df = df[df['mp_length'] > 0]
     logging.info("0 or negative values removed.")
 
     # Convert to Pandas DataFrame for processing
