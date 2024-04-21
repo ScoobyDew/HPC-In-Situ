@@ -10,7 +10,7 @@ time_start = time.time()
 logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-Situ/Thresholding/thresh2.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-main_data_path = '/mnt/parscratch/users/eia19od/combined_data_with_parameters.parquet'
+main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
 labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
 
 logging.info("Reading the main and labeled datasets using Dask.")
