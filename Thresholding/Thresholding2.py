@@ -60,7 +60,7 @@ logging.info("Plotting the violin plot.")
 # Plotting
 logging.info("Plotting the violin plot with custom colors.")
 plt.figure(figsize=(12, 8))
-palette = {'1': "blue", '2': "green", '3': "yellow"}  # Custom color palette
+palette = {'1': "tab:blue", '2': "tab:green", '3': "tab:olive"}  # Custom color palette
 
 sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data, palette=palette)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
@@ -74,6 +74,20 @@ plt.title('Violin Plot of E*0 by Region Label')
 plt.xlabel('Region Label')
 plt.ylabel('E*0')
 plt.savefig('/mnt/parscratch/users/eia19od/violins/Estar_colored.png')
+
+plt.figure(figsize=(12, 8))
+sns.violinplot(x='RegionLabel', y='Power (W)', data=computed_data, palette=palette)
+plt.title('Violin Plot of E*0 by Region Label')
+plt.xlabel('Region Label')
+plt.ylabel('Power (W)')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/Power_colored.png')
+
+plt.figure(figsize=(12, 8))
+sns.violinplot(x='RegionLabel', y='Speed (mm/s)', data=computed_data, palette=palette)
+plt.title('Violin Plot of E*0 by Region Label')
+plt.xlabel('Region Label')
+plt.ylabel('Speed (mm/s)')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/Speed_colored.png')
 
 logging.info("Colored violin plots created and saved successfully.")
 
