@@ -48,7 +48,7 @@ computed_data = merged_data.compute()  # This triggers the actual computation
 # Plotting
 logging.info("Plotting the violin plot.")
 plt.figure(figsize=(12, 8))
-sns.violinplot(x='RegionLabel', y='Normalized Enthalpy', data=computed_data)
+sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data)
 plt.title('Violin Plot of Normalized Energy by Cluster')
 plt.xlabel('Cluster')
 plt.ylabel('Normalized Energy')
