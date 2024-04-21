@@ -55,7 +55,7 @@ def main():
             hue='cluster',
             palette='viridis',
             binwidth=[1,1],
-            binrange=[0,70],[0,65],
+            binrange=([0,70], [0,65]),
             kde=False,
             stat="count",  # Use 'count' to show the number of occurrences in each bin
             cbar=True,  # Optional: Add a color bar to indicate counts
