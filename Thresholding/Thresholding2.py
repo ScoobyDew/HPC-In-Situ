@@ -30,7 +30,7 @@ labeled_data['mp_width'] = labeled_data['mp_width'].astype(int)
 # Merge main data with labeled data on 'mp_width' and 'mp_length'
 logging.info("Merging main data with labeled data.")
 merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], how='left')
-filtered_data = merged_data[merged_data['RegionLabel'] != 0]
+
 
 # Use pandas to read Excel file (Processing parameters)
 logging.info("Reading processing parameters.")
@@ -44,7 +44,7 @@ merged_data['Part Number'] = merged_data['Part Number'].astype(str)
 # Merge processing parameters with merged_data on 'Part Number'
 logging.info("Merging with processing parameters.")
 final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
-
+final_merged_data = merged_data[merged_data['RegionLabel'] != 0]
 # Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
