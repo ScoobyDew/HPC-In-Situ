@@ -57,19 +57,26 @@ computed_data = final_merged_data.compute()
 # Plotting
 logging.info("Plotting the violin plot.")
 
+# Plotting
+logging.info("Plotting the violin plot with custom colors.")
 plt.figure(figsize=(12, 8))
-sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data)
+palette = {1: "blue", 2: "green", 3: "yellow"}  # Custom color palette
+sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data, palette=palette)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region Label')
-plt.ylabel(f'$\\frac{{\\Delta H}}{{h_s}}$')
-plt.savefig('/mnt/parscratch/users/eia19od/violins/NormH.png')
+plt.ylabel('Normalised Enthalpy')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/NormH_colored.png')
 
 plt.figure(figsize=(12, 8))
-sns.violinplot(x='RegionLabel', y='E*0', data=computed_data)
-plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+sns.violinplot(x='RegionLabel', y='E*0', data=computed_data, palette=palette)
+plt.title('Violin Plot of E*0 by Region Label')
 plt.xlabel('Region Label')
-plt.ylabel(f'$E*_0$')
-plt.savefig('/mnt/parscratch/users/eia19od/violins/Estar.png')
+plt.ylabel('E*0')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/Estar_colored.png')
+
+logging.info("Colored violin plots created and saved successfully.")
+
+logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
 logging.info("Violin plot created and saved successfully.")
 
