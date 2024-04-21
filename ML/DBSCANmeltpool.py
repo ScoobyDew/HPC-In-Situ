@@ -60,9 +60,7 @@ def main():
         y='mp_length',
         hue='cluster',
         palette='viridis',
-        binwidth= (1,1),
-        bins=30,  # Adjust based on the range and spread of your data
-        kde=False
+        binwidth= (1,1)
     )
     plt.title('2D Histogram of Meltpool Width and Length by Cluster')
     plt.xlabel('Melt Pool Width')
@@ -73,8 +71,8 @@ def main():
     else:
         logging.info("Legend generated successfully.")
 
-    plt.legend(title='Cluster')
-    plt.grid(True)
+    # plt.legend(title='Cluster')
+    # plt.grid(True)
     plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y%m%d%H%M%S")}.png')
     plt.close()
     logging.info("Plot saved successfully.")
