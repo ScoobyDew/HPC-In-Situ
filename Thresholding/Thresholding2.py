@@ -42,8 +42,11 @@ processing_parameters = pd.read_excel(parameters_path)
 # Convert the pandas DataFrame to a Dask DataFrame
 processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
 
-# Merge ['Normalised Enthalpy', 'Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'
-labeled_data = dd.merge(labeled_data, processing_parameters, on=['Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'], how='left')
+# Select the columns to merge from the processing_parameters DataFrame
+processing_parameters_subset = processing_parameters[['Part Number', 'Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)']]
+
+# Merge on 'Part Number'
+labeled_data = dd.merge(labeled_data, processing_parameters_subset, on='Part Number', how='left')
 
 logging.info("Datasets read successfully.")
 
