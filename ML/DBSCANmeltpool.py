@@ -6,7 +6,7 @@ import dask.dataframe as dd
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.cluster import DBSCAN, OPTICS  # Corrected import
+from sklearn.cluster import DBSCAN, OPTICS, HDBSCAN  # Corrected import
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, filename='dbscancpu.log', filemode='w',
@@ -41,7 +41,7 @@ def main():
 
     # Perform DBSCAN clustering
     logging.info("Performing DBSCAN clustering.")
-    cluster_model = DBSCAN(eps=3, min_samples=2).fit(X)
+    cluster_model = HDBSCAN(min_samples=3).fit(X)
 
     logging.info("Clustering complete.")
 
