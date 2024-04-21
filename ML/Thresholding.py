@@ -10,7 +10,7 @@ import seaborn as sns
 from scipy.ndimage import label
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, filename='dbscancpu.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='thresh.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
