@@ -31,7 +31,6 @@ labeled_data['mp_width'] = labeled_data['mp_width'].astype(int)
 logging.info("Merging main data with labeled data.")
 merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], how='left')
 
-
 # Use pandas to read Excel file (Processing parameters)
 logging.info("Reading processing parameters.")
 processing_parameters = pd.read_excel(parameters_path)
@@ -44,14 +43,12 @@ merged_data['Part Number'] = merged_data['Part Number'].astype(str)
 # Merge processing parameters with merged_data on 'Part Number'
 logging.info("Merging with processing parameters.")
 final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
-final_merged_data = merged_data[merged_data['RegionLabel'] != 0]
+logging.info(f"Columns in final merged data: {final_merged_data.columns}")
+
 
 # Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
-
-# Log the column names of the final merged data
-logging.info(f"Column names of the final merged data: {final_merged_data.columns}")
 
 # Plotting
 logging.info("Plotting the violin plot.")
