@@ -41,7 +41,7 @@ def main():
 
     # Perform DBSCAN clustering
     logging.info("Performing DBSCAN clustering.")
-    cluster_model = OPTICS(min_samples=2).fit(X)
+    cluster_model = DBSCAN(eps=3, min_samples=2).fit(X)
 
     logging.info("Clustering complete.")
 
@@ -60,7 +60,7 @@ def main():
         x='mp_width',
         y='mp_length',
         hue='cluster',
-        palette='viridis',
+        # palette='viridis',
         binwidth= (1,1)
     )
     plt.title('2D Histogram of Meltpool Width and Length by Cluster')
