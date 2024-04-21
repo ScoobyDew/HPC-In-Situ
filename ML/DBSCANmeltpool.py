@@ -41,7 +41,8 @@ def main():
 
     # Perform DBSCAN clustering
     logging.info("Performing Spectral clustering.")
-    cluster_model = SpectralClustering(n_clusters=3).fit(X)
+    cluster_model = SpectralClustering(n_clusters=3, affinity='nearest_neighbors',
+                                       n_jobs = -1).fit(X)
 
     logging.info("Clustering complete.")
 
