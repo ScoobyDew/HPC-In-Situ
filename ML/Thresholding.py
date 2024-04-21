@@ -20,53 +20,31 @@ def main():
 
     # Remove any 0 or negative values
     logging.info("Removing any 0 or negative values.")
-    df = df[(df['mp_width'] > 0)]
-    df = df[(df['mp_length'] > 0)]
+    df = df[(df['mp_width'] > 0) & (df['mp_length'] > 0)]
     logging.info("0 or negative values removed.")
 
     # Convert to Pandas DataFrame for processing
     logging.info("Converting to Pandas DataFrame.")
     X = df.compute()
 
-    # Compute the 2D histogram
-    logging.info("Computing 2D histogram.")
-    histogram, x_edges, y_edges = np.histogram2d(
-        X['mp_width'], X['mp_length'],
-        bins=(np.arange(X['mp_width'].min(), X['mp_width'].max() + 1), np.arange(X['mp_length'].min(), X['mp_length'].max() + 1)))
-
-    # Plotting the histogram
-    logging.info("Plotting the histogram.")
-    plt.figure(figsize=(10, 8))
-    plt.imshow(histogram.T, origin='lower', aspect='auto', extent=[x_edges[0], x_edges[-1], y_edges[0], y_edges[-1]], interpolation='nearest')
-    plt.colorbar(label='Counts')
-    plt.title('2D Histogram of Meltpool Width and Length')
-    plt.xlabel('Melt Pool Width')
-    plt.ylabel('Melt Pool Length')
-    plt.grid(True)
-    plt.savefig(f'/mnt/parscratch/users/eia19od/histogram_{time.strftime("%Y%m%d%H%M%S")}.png')
-    plt.close()
-    logging.info("Histogram plot saved successfully.")
-
-    # Save histogram data to CSV
-    histogram_data = pd.DataFrame(histogram, index=np.arange(y_edges[0], y_edges[-1]), columns=np.arange(x_edges[0], x_edges[-1]))
-    histogram_data.to_csv(f'/mnt/parscratch/users/eia19od/histogram_data_{time.strftime("%Y%m%d%H%M%S")}.csv')
-    logging.info("Histogram data saved successfully.")
+    # Define the bin edges so that every possible value of mp_width and mp_length is a bin edge
+    x_edges = np.arange(X['mp_width'].min(), X['mp_width'].max() + 2)  # +2 to ensure the max value is included in a bin
+    y_edges = np.arange(X['mp_length'].min(), X['mp_length'].max() + 2)
 
     # Compute the 2D histogram
     logging.info("Computing 2D histogram.")
     histogram, x_edges, y_edges = np.histogram2d(
         X['mp_width'], X['mp_length'],
-        bins=(np.arange(X['mp_width'].min(), X['mp_width'].max() + 1),
-              np.arange(X['mp_length'].min(), X['mp_length'].max() + 1)))
+        bins=(x_edges, y_edges))
 
-    # Calculate the density of datapoints
-    bin_area = 1  # Since the bin size is 1 in both dimensions
-    total_datapoints = len(X)
-    density = (histogram / total_datapoints) * bin_area
+    # Calculate density
+    total_datapoints = np.sum(histogram)
+    density = histogram / total_datapoints
 
-    # Create a DataFrame with mp_length, mp_width and density
-    mp_width, mp_length = np.meshgrid(x_edges[:-1], y_edges[
-                                                    :-1])  # Use the bin edges to get the unique values of mp_width and mp_length
+    # Create meshgrid of mp_width and mp_length values
+    mp_width, mp_length = np.meshgrid(x_edges[:-1], y_edges[:-1], indexing='ij')
+
+    # Flatten the arrays and create a DataFrame
     histogram_data = pd.DataFrame({
         'mp_width': mp_width.ravel(),
         'mp_length': mp_length.ravel(),
@@ -74,10 +52,11 @@ def main():
     })
 
     # Save histogram data to CSV
-    histogram_data.to_csv(f'/mnt/parscratch/users/eia19od/histogram_data_{time.strftime("%Y%m%d%H%M%S")}.csv',
-                          index=False)
-    logging.info("Histogram data saved successfully.")
+    output_path = f'/mnt/parscratch/users/eia19od/histogram_density_data_{time.strftime("%Y%m%d%H%M%S")}.csv'
+    histogram_data.to_csv(output_path, index=False)
+    logging.info(f"Histogram data saved successfully at {output_path}.")
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
+
 if __name__ == "__main__":
     main()
