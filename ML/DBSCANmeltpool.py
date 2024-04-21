@@ -60,7 +60,7 @@ def main():
         plt.ylabel('Melt Pool Length')
         plt.legend(title='Cluster')
         plt.grid(True)
-        plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y-%m-%d-%H%M%S")}.png')
+        plt.savefig(f'/mnt/parscratch/users/eia19od/cluster_plot_{time.strftime("%Y%m%d%H%M%S")}.png')
         plt.close()
         logging.info("Plot saved successfully.")
 

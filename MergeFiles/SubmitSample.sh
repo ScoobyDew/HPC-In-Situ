@@ -6,9 +6,9 @@
 #SBATCH --ntasks=1
 
 #SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=240G
+#SBATCH --ntasks=8
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=60G
 #SBATCH --time=00:45:00
 #SBATCH --output=result_%j.log
 #SBATCH --error=error_%j.log
