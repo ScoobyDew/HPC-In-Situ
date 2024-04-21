@@ -6,8 +6,8 @@
 #SBATCH --ntasks=1
 
 #SBATCH --nodes=1
-#SBATCH --ntasks=32
-#SBATCH --cpus-per-task=1
+#SBATCH --ntasks=16
+#SBATCH --cpus-per-task=2
 #SBATCH --mem=120G
 #SBATCH --time=00:45:00
 #SBATCH --output=result.log
