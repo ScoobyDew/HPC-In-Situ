@@ -41,7 +41,7 @@ def main():
 
         # Assign cluster labels to the original Pandas DataFrame
         logging.info("Assigning cluster labels to the DataFrame.")
-        X['cluster'] = labels
+        X['cluster'] = labels.astype(str)
 
         # Plotting the data
         logging.info("Plotting the cluster distribution.")
