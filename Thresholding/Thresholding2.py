@@ -56,12 +56,21 @@ computed_data = final_merged_data.compute()
 
 # Plotting
 logging.info("Plotting the violin plot.")
+
 plt.figure(figsize=(12, 8))
 sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region Label')
-plt.ylabel('Normalised Enthalpy')
-plt.savefig('/mnt/parscratch/users/eia19od/violin_plot.png')
+plt.ylabel(f'$\\frac{{\\Delta H}}{{h_s}}$')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/NormH.png')
+
+plt.figure(figsize=(12, 8))
+sns.violinplot(x='RegionLabel', y='E*0', data=computed_data)
+plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+plt.xlabel('Region Label')
+plt.ylabel(f'$E*_0$')
+plt.savefig('/mnt/parscratch/users/eia19od/violins/Estar.png')
+
 logging.info("Violin plot created and saved successfully.")
 
 logging.info(f"Total processing time: {time.time() - time_start} seconds.")
