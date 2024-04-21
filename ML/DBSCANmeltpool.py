@@ -60,7 +60,6 @@ def main():
         y='mp_length',
         hue='cluster',
         palette='viridis',
-        style='cluster',
         binwidth= (1,1),
         bins=30,  # Adjust based on the range and spread of your data
         kde=False
