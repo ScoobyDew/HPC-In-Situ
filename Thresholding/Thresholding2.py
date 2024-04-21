@@ -53,6 +53,7 @@ final_merged_data = final_merged_data[final_merged_data['RegionLabel'] != 0]
 # Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
+computed_data['RegionLabel'] = computed_data['RegionLabel'].astype(int)
 
 # Plotting
 logging.info("Plotting the violin plot.")
@@ -61,6 +62,7 @@ logging.info("Plotting the violin plot.")
 logging.info("Plotting the violin plot with custom colors.")
 plt.figure(figsize=(12, 8))
 palette = {1: "blue", 2: "green", 3: "yellow"}  # Custom color palette
+
 sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data, palette=palette)
 plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region Label')
