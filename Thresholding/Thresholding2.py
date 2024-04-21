@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import logging
 import time
+import pandas as pd
 
 time_start = time.time()
 
