@@ -45,6 +45,10 @@ logging.info("Merging with processing parameters.")
 final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
 logging.info(f"Columns in final merged data: {final_merged_data.columns}")
 
+# Remove RegionLabel == 0
+logging.info("Removing RegionLabel == 0")
+final_merged_data = final_merged_data[final_merged_data['RegionLabel'] != 0]
+
 
 # Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
