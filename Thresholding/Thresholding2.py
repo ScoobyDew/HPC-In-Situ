@@ -17,6 +17,8 @@ parameters_path = '/mnt/parscratch/users/eia19od/merged_data.xlsx'
 
 logging.info("Reading the main and labeled datasets using Dask.")
 main_data = dd.read_parquet(main_data_path)
+# downsample main_data to .01%
+main_data = main_data.sample(frac=0.0001)
 labeled_data = dd.read_csv(labeled_data_path)
 
 # Ensure 'mp_length' and 'mp_width' are integer for merging consistency
