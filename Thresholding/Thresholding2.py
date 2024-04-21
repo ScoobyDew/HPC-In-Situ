@@ -52,7 +52,11 @@ logging.info("Datasets read successfully.")
 
 # Merge the datasets
 logging.info("Merging the datasets.")
-merged_data = dd.merge(main_data, labeled_data, on=['mp_length', 'mp_width'], how='left')
+# Merge processing_parameters_subset with main_data on 'Part Number'
+merged_data = dd.merge(main_data, processing_parameters_subset, on='Part Number', how='left')
+
+# Merge the resulting DataFrame with labeled_data on 'mp_length' and 'mp_width'
+final_merged_data = dd.merge(merged_data, labeled_data, on=['mp_length', 'mp_width'], how='left')
 logging.info("Datasets merged successfully.")
 
 # Compute necessary part for plotting
