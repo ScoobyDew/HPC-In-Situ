@@ -30,6 +30,7 @@ labeled_data['mp_width'] = labeled_data['mp_width'].astype(int)
 # Merge main data with labeled data on 'mp_width' and 'mp_length'
 logging.info("Merging main data with labeled data.")
 merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], how='left')
+filtered_data = merged_data[merged_data['RegionLabel'] != 0]
 
 # Use pandas to read Excel file (Processing parameters)
 logging.info("Reading processing parameters.")
