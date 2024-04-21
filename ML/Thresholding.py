@@ -28,18 +28,14 @@ def main():
     X = df.compute()
 
     # Define the bin edges so that every possible value of mp_width and mp_length is a bin edge
-    x_edges = np.arange(X['mp_width'].min(), X['mp_width'].max() + 2)  # +2 to ensure the max value is included in a bin
+    x_edges = np.arange(X['mp_width'].min(), X['mp_width'].max() + 2)  # +2 to include the max value
     y_edges = np.arange(X['mp_length'].min(), X['mp_length'].max() + 2)
 
     # Compute the 2D histogram
-    logging.info("Computing 2D histogram.")
+    logging.info("Computing 2D histogram for counts.")
     histogram, x_edges, y_edges = np.histogram2d(
         X['mp_width'], X['mp_length'],
         bins=(x_edges, y_edges))
-
-    # Calculate density
-    total_datapoints = np.sum(histogram)
-    density = histogram / total_datapoints
 
     # Create meshgrid of mp_width and mp_length values
     mp_width, mp_length = np.meshgrid(x_edges[:-1], y_edges[:-1], indexing='ij')
@@ -48,13 +44,13 @@ def main():
     histogram_data = pd.DataFrame({
         'mp_width': mp_width.ravel().astype(int),
         'mp_length': mp_length.ravel().astype(int),
-        'density': density.ravel().astype(int)
+        'counts': histogram.ravel().astype(int)
     })
 
     # Save histogram data to CSV
-    output_path = f'/mnt/parscratch/users/eia19od/histogram_density_data_{time.strftime("%Y%m%d%H%M%S")}.csv'
+    output_path = f'/mnt/parscratch/users/eia19od/histogram_counts_data_{time.strftime("%Y%m%d%H%M%S")}.csv'
     histogram_data.to_csv(output_path, index=False)
-    logging.info(f"Histogram data saved successfully at {output_path}.")
+    logging.info(f"Counts data saved successfully at {output_path}.")
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
