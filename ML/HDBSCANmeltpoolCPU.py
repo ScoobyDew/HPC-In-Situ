@@ -57,10 +57,7 @@ def main():
             y='mp_length',
             hue='cluster',
             palette='viridis',
-            binwidth=(1,1),
-            kde=False,
-            stat="count",  # Use 'count' to show the number of occurrences in each bin
-            cbar=True,  # Optional: Add a color bar to indicate counts
+            binwidth=(1,1)
         )
         plt.title('2D Histogram of Meltpool Width and Length by Cluster')
         plt.xlabel('Melt Pool Width')
