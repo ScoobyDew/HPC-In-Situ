@@ -48,14 +48,16 @@ final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
 
-# Plotting
-logging.info("Plotting the violin plot.")
-
-# Ensure RegionLabel is an integer if it's supposed to be
+# Ensure 'RegionLabel' is available as integer if it's supposed to be
+# Filtering the data to include only regions 1, 2, and 3
+filtered_data = computed_data[computed_data['RegionLabel'].isin([1, 2, 3])]
 filtered_data['RegionLabel'] = filtered_data['RegionLabel'].astype(int)
 
 # Create a color palette
 palette = {1: 'blue', 2: 'green', 3: 'yellow'}
+
+# Plotting
+logging.info("Plotting the violin plot.")
 
 # Create the violin plot for Normalized Enthalpy
 plt.figure(figsize=(12, 8))
