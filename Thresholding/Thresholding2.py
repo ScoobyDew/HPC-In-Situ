@@ -1,9 +1,9 @@
 import dask.dataframe as dd
+import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import logging
 import time
-import pandas as pd
 
 time_start = time.time()
 
@@ -17,63 +17,43 @@ parameters_path = '/mnt/parscratch/users/eia19od/merged_data.xlsx'
 
 logging.info("Reading the main and labeled datasets using Dask.")
 main_data = dd.read_parquet(main_data_path)
-
-# Convert data types
-main_data['mp_length'] = main_data['mp_length'].astype(int)
-main_data['mp_width'] = main_data['mp_width'].astype(int)
-
-# Downsample the data to .1% of the original size
-main_data = main_data.sample(frac=0.001)
-
-# Print column names and data types form the main dataset
-logging.info("Column names and data types from the main dataset:")
-logging.info(f"Columns: {main_data.columns}")
-
-
 labeled_data = dd.read_csv(labeled_data_path)
 
-# Print column names and data types from the labeled dataset
-logging.info("Column names and data types from the labeled dataset:")
-logging.info(f"Columns: {labeled_data.columns}")
+# Inspecting columns
+logging.info(f"Main data columns: {main_data.columns.tolist()}")
+logging.info(f"Labeled data columns: {labeled_data.columns.tolist()}")
 
-# Use pandas to read the Excel file
+# Ensure 'Part Number' is present and correctly typed
+if 'Part Number' not in main_data.columns:
+    logging.error("Part Number column missing in main data.")
+    raise KeyError("Part Number column missing in main data.")
+if 'Part Number' not in labeled_data.columns:
+    logging.error("Part Number column missing in labeled data.")
+    raise KeyError("Part Number column missing in labeled data.")
+
+# Using pandas to read Excel file (Processing parameters)
 processing_parameters = pd.read_excel(parameters_path)
+logging.info("Parameters read successfully with pandas.")
 
-# Convert the pandas DataFrame to a Dask DataFrame
+# Convert pandas DataFrame to Dask DataFrame
 processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
 
-# Select the columns to merge from the processing_parameters DataFrame
-processing_parameters_subset = processing_parameters[['Part Number', 'Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)']]
-
-# Merge on 'Part Number'
-labeled_data = dd.merge(labeled_data, processing_parameters_subset, on='Part Number', how='left')
-
-logging.info("Datasets read successfully.")
-
-# Merge the datasets
+# Merge the datasets on 'Part Number'
 logging.info("Merging the datasets.")
-# Merge processing_parameters_subset with main_data on 'Part Number'
-merged_data = dd.merge(main_data, processing_parameters_subset, on='Part Number', how='left')
-
-# Merge the resulting DataFrame with labeled_data on 'mp_length' and 'mp_width'
+merged_data = dd.merge(main_data, processing_parameters, on='Part Number', how='left')
 final_merged_data = dd.merge(merged_data, labeled_data, on=['mp_length', 'mp_width'], how='left')
 logging.info("Datasets merged successfully.")
 
 # Compute necessary part for plotting
 logging.info("Computing necessary data for plotting.")
-computed_data = merged_data.compute()  # This triggers the actual computation
+computed_data = final_merged_data.compute()
 
 # Plotting
-logging.info("Plotting the violin plot.")
 plt.figure(figsize=(12, 8))
-sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=computed_data)
-plt.title('Violin Plot of Normalized Energy by Cluster')
-plt.xlabel('Cluster')
-plt.ylabel('Normalized Energy')
-logging.info("Violin plot created successfully.")
-
-# Save the plot
-output_path = '/mnt/parscratch/users/eia19od/violin_plot.png'
-plt.savefig(output_path)
-logging.info(f"Violin plot saved successfully at {output_path}.")
+sns.violinplot(x='RegionLabel', y='Normalized Enthalpy', data=computed_data)
+plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+plt.xlabel('Region Label')
+plt.ylabel('Normalized Enthalpy')
+plt.savefig('/mnt/parscratch/users/eia19od/violin_plot.png')
+logging.info("Violin plot created and saved successfully.")
 logging.info(f"Total processing time: {time.time() - time_start} seconds.")
