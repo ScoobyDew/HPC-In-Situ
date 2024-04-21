@@ -35,7 +35,11 @@ labeled_data = dd.read_csv(labeled_data_path)
 logging.info("Column names and data types from the labeled dataset:")
 logging.info(f"Columns: {labeled_data.columns}")
 
-processing_parameters = dd.read_excel(parameters_path)
+# Use pandas to read the Excel file
+processing_parameters = pd.read_excel(parameters_path)
+
+# Convert the pandas DataFrame to a Dask DataFrame
+processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
 
 # Merge ['Normalised Enthalpy', 'Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'
 labeled_data = dd.merge(labeled_data, processing_parameters, on=['Power (W)', 'Speed (mm/s)', 'Hatch (um)', 'Focus', 'Beam radius (um)'], how='left')
