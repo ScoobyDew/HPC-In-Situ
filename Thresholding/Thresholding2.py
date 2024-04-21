@@ -45,9 +45,13 @@ merged_data['Part Number'] = merged_data['Part Number'].astype(str)
 logging.info("Merging with processing parameters.")
 final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
 final_merged_data = merged_data[merged_data['RegionLabel'] != 0]
+
 # Compute necessary data for plotting
 logging.info("Computing necessary data for plotting.")
 computed_data = final_merged_data.compute()
+
+# Log the column names of the final merged data
+logging.info(f"Column names of the final merged data: {final_merged_data.columns}")
 
 # Plotting
 logging.info("Plotting the violin plot.")
