@@ -25,14 +25,14 @@ main_data = main_data.sample(frac=0.001)
 
 # Print column names and data types form the main dataset
 logging.info("Column names and data types from the main dataset:")
-logging.info(main_data.dtypes)
+logging.info(f"Columns: {main_data.columns}")
 
 
 labeled_data = dd.read_csv(labeled_data_path)
 
 # Print column names and data types from the labeled dataset
 logging.info("Column names and data types from the labeled dataset:")
-logging.info(labeled_data.dtypes)
+logging.info(f"Columns: {labeled_data.columns}")
 
 logging.info("Datasets read successfully.")
 
