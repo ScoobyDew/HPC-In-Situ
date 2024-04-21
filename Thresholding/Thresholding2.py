@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO, filename='thresh2.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 main_data_path = '/mnt/parscratch/users/eia19od/combined_data_with_parameters.parquet'
-labeled_data_path = 'sftp://eia19od@stanage.shef.ac.uk/mnt/parscratch/users/eia19od/labelled.csv'
+labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
 
 logging.info("Reading the main and labeled datasets.")
 main_data = pd.read_parquet(main_data_path)
