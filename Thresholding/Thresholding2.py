@@ -66,6 +66,7 @@ plt.title('Violin Plot of Normalized Enthalpy by Region Label')
 plt.xlabel('Region')
 plt.ylabel(r'$\frac{\Delta H}{h_s}$')  # Correct LaTeX formatting
 plt.savefig('/mnt/parscratch/users/eia19od/NENTH_violin_plot.png')
+plt.close()
 
 # Create the violin plot for E*0
 plt.figure(figsize=(12, 8))
@@ -74,6 +75,7 @@ plt.title('Violin Plot of E*0 by Region Label')
 plt.xlabel('Region')
 plt.ylabel(r'$E^{*}_0$')  # Correct LaTeX formatting
 plt.savefig('/mnt/parscratch/users/eia19od/E0_violin_plot.png')
+plt.close()
 
 # Logging completion
 logging.info("Violin plots created and saved successfully.")
