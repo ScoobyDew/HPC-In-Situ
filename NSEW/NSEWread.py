@@ -21,24 +21,31 @@ def read_and_plot(directory):
     all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
     for file in all_files:
         quadrant = file.split('_')[0]
+        df = pd.read_csv(os.path.join(directory, file))
+        if df.empty or 'instantaneous_distance' not in df.columns:
+            logging.warning(f"File {file} does not contain 'instantaneous_distance'. Skipping...")
+            continue  # Skip files that do not contain the required column
         if quadrant in quadrants:
-            df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
 
-    logging.info('Read data from CSV files')
+    logging.info('Data loaded and organized by quadrant')
 
-    # For each unique quadrant bin the data and plot the mean
+    # Bin and plot data for each quadrant
     for quadrant, color in colors.items():
         for df in quadrant_data[quadrant]:
-            bins = pd.cut(df['instantaneous_distance'], bins=20, include_lowest=True, right=True)
-            df['bin'] = bins
-            df['bin_mid'] = df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-            grouped = df.groupby('bin', as_index=False, observed=True).agg({'pyro2': ['mean', 'std']})
-            grouped.columns = ['bin', 'mean', 'std']
-            grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
-            quadrant_data[quadrant] = grouped
+            try:
+                bins = pd.cut(df['instantaneous_distance'], bins=20, include_lowest=True, right=True)
+                df['bin'] = bins
+                df['bin_mid'] = df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+                grouped = df.groupby('bin', as_index=False).agg({'pyro2': ['mean', 'std']})
+                grouped.columns = ['bin', 'mean', 'std']  # Simplify multi-level columns
+                grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
+                quadrant_data[quadrant] = grouped
+            except KeyError as e:
+                logging.error(f"Error processing {quadrant} data: {e}")
+                continue
 
-    logging.info('Binned data for each quadrant')
+    logging.info('Binned data for each quadrant prepared')
 
     # Plot the average values for each quadrant
     plt.figure(figsize=(12, 6))
