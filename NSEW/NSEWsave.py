@@ -70,7 +70,7 @@ def main():
             df = pd.read_parquet(file_path)
             df = assign_quadrant(df)
             df = shift_to_zero(df)
-            bins = np.linspace(df['instantaneous_distance'].min(), df['instantaneous_distance'].max(), 40)
+            bins = np.linspace(df['instantaneous_distance'].min(), df['instantaneous_distance'].max(), 20)
             for quadrant in ['North', 'East', 'South', 'West']:
                 bin_signal(df, signal, bins, quadrant, file_number)
         else:

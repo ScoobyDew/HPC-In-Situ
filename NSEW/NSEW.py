@@ -124,7 +124,7 @@ def main():
         logging.error("No files loaded. Exiting.")
         return
     bins = np.linspace(min(df['instantaneous_distance'].min() for df in dfs),
-                       max(df['instantaneous_distance'].max() for df in dfs), 40)
+                       max(df['instantaneous_distance'].max() for df in dfs), 20)
 
     signal = 'pyro2'
     logging.info("Plotting quadrants.")
