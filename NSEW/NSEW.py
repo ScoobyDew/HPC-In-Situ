@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-
 
 def get_random_files(n, exclude, max_val):
     file_numbers = [num for num in range(1, max_val + 1) if num not in exclude]
+
+    # Randomly select n files from the list of file numbers
+    np.random.seed(42)
     selected_files = np.random.choice(file_numbers, size=n, replace=False)
     return selected_files
 
@@ -39,7 +42,8 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
     for quadrant, color, ax in zip(quadrants, colors, axs.flatten()):
         for idx, df in enumerate(dfs):
             quad_df = df[df['quadrant'] == quadrant].copy()
-            quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
+            # Convert categorical column to regular Pandas Series
+            quad_df['bin'] = pd.cut(quad_df[x].compute(), bins=bins, include_lowest=True, right=True).astype('object')
             quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
             grouped = quad_df.groupby('bin_mid', observed=True)[signal].agg(['mean', 'std']).reset_index()
             valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
@@ -66,7 +70,7 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
 def main():
     time_start = time.time()
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
-    n_files = 15
+    n_files = 25
     max_val = 124
     exclude = [1, 4, 64, 67]
     selected_files = get_random_files(n_files, exclude, max_val)
@@ -92,6 +96,7 @@ def main():
     logging.info(f"Plotting quadrants.")
     plot_quadrant(dfs, ['North', 'South'], bins, signal, ['red', 'blue'])
     plot_quadrant(dfs, ['East', 'West'], bins, signal, ['green', 'orange'])
+    logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
 
 if __name__ == '__main__':
