@@ -44,7 +44,9 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
             quad_df = df[df['quadrant'] == quadrant].copy()
             # Convert categorical column to regular Pandas Series
             quad_df['bin'] = pd.cut(quad_df[x].compute(), bins=bins, include_lowest=True, right=True).astype('object')
-            quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+            # Extract midpoints directly from the IntervalIndex
+            midpoints = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan).values
+            quad_df['bin_mid'] = midpoints
             grouped = quad_df.groupby('bin_mid', observed=True)[signal].agg(['mean', 'std']).reset_index()
             valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
             midpoints = grouped['bin_mid'][valid_mask]
@@ -56,6 +58,16 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
         ax.set_ylabel(f'$V_{{p}}\\prime$')
         ax.legend()
     plt.tight_layout()
+
+    # Save the plot to directory if it does not exist
+    if not os.path.exists('/mnt/parscratch/users/eia19od/Quadrants'):
+        os.makedirs('/mnt/parscratch/users/eia19od/Quadrants')
+
+    # Create a string with the current date and time
+    end_time = time.time()
+    date_time = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(end_time))
+    plt.savefig(f'/mnt/parscratch/users/eia19od/Quadrants/Quadrants_{date_time}.png')
+
 
     # Save the plot to directory if it does not exist
     if not os.path.exists('/mnt/parscratch/users/eia19od/Quadrants'):
