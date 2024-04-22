@@ -56,7 +56,7 @@ def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_dis
             minmax_norm = (means - means.min()) / (means.max() - means.min())
 
             ax.plot(midpoints, minmax_norm, color=color,
-                    label=f'File {idx + 1} - {quadrant}', alpha=0.5)
+                    label=f'File {idx + 1} - {quadrant}', alpha=0.3)
 
     ax.set_title(f'{"/".join(quadrants)} Quadrants')
     ax.set_xlabel('x (mm)')
