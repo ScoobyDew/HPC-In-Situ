@@ -21,16 +21,21 @@ def assign_quadrant(df):
 
     def get_quadrant(angle):
         if angle == 0:
-            return 'West'
+            return 'East'
         elif angle == 90:
             return 'North'
         elif angle == 180 or angle == -180:
-            return 'South'
+            return 'West'
         elif angle == -90 or angle == 270:
-            return 'East'
+            return 'South'
 
     df['quadrant'] = df['90angle'].apply(get_quadrant)
     return df
+
+def swap_directions(df):
+    df['quadrant'] = df['quadrant'].replace({'North': 'West', 'West': 'North', 'South': 'East', 'East': 'South'})
+    return df
+
 
 def shift_to_zero(df):
     df['instantaneous_distance'] -= df['instantaneous_distance'].min()
@@ -62,7 +67,7 @@ def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_dis
             ax.plot(midpoints, minmax_norm, color=color,
                     label=f'File {idx + 1} - {quadrant}', alpha=0.3)
 
-    ax.set_title(f'{"/".join(quadrants)} Scan Directions')
+    ax.set_title(f'{"/".join(quadrants)} Quadrants')
     ax.set_xlabel('x (mm)')
     ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
 
@@ -79,13 +84,11 @@ def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
     for pair, colors, ax in zip(quadrant_pairs, color_pairs, axs.flatten()):
         plot_quadrant(dfs, pair, bins, signal, colors, x=x, ax=ax)
-
     plt.tight_layout()
 
     # Save to 'quadrants' directory
     if not os.path.exists('quadrants'):
         os.makedirs('quadrants')
-
     date = time.strftime('%Y-%m-%d_%H-%M-%S')
     plt.savefig(f'quadrants/quadrants_{date}.png')
 
@@ -93,7 +96,7 @@ def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
 def main():
     start_time = time.time()
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
-    n_files = 4
+    n_files = 60
     max_val = 124
     exclude = [1, 4, 64, 67]
     selected_files = get_random_files(n_files, exclude, max_val)
@@ -109,6 +112,8 @@ def main():
             df = shift_to_zero(df)
 
             dfs.append(df)
+            # Apply the function to each DataFrame in your list `dfs`:
+            dfs = [swap_directions(df) for df in dfs]
             logging.info(f"Loaded {file_path}")
 
 
