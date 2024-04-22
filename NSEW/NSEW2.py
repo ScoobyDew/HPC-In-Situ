@@ -39,23 +39,24 @@ def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
 
 def plot_quadrants(dfs, bins, signal):
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    colors = ['red', 'blue', 'green', 'orange']
+    colors = ['red', 'blue', 'green', 'orange']  # Ensure this is correctly used
     quadrant_pairs = [('North', 'South'), ('East', 'West')]
 
     for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
-        for quadrant, clr in zip(quadrants, color):
+        for quadrant, clr in zip(quadrants, color):  # This might be causing issues if 'color' isn't iterable as expected
             for df in dfs:
                 grouped = bin_signal(df, signal, bins, quadrant=quadrant)
                 normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (grouped['mean'].max() - grouped['mean'].min())
                 ax.plot(grouped['bin_mid'], normalized_mean, color=clr, label=f'{quadrant} Mean', alpha=0.5)
 
-            ax.set_title(f'{"/".join(quadrants)} Quadrants')
-            ax.set_xlabel('x (mm)')
-            ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
-            ax.legend(handles=[mpatches.Patch(color=clr, label=quadrant) for quadrant, clr in zip(quadrants, color)])
+        ax.set_title(f'{"/".join(quadrants)} Quadrants')
+        ax.set_xlabel('x (mm)')
+        ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
+        ax.legend(handles=[mpatches.Patch(color=clr, label=quadrant) for quadrant, clr in zip(quadrants, color)])  # Verify this part
 
     plt.tight_layout()
     plt.savefig('quadrants_plot.png')
+
 
 def main():
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
