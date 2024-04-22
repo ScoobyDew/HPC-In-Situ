@@ -32,27 +32,36 @@ def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
     quad_df = df[df['quadrant'] == quadrant].copy()
     quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
     quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-    grouped = quad_df.groupby('bin', as_index=False).agg({signal: ['mean', 'std']})
+    grouped = quad_df.groupby('bin', as_index=False, observed=True).agg({signal: ['mean', 'std']})
     grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
     grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
     return grouped
 
+
 def plot_quadrants(dfs, bins, signal):
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    colors = ['red', 'blue', 'green', 'orange']  # Ensure this is correctly used
+    colors = [['red', 'blue'], ['green', 'orange']]  # Each sub-plot gets two colors
     quadrant_pairs = [('North', 'South'), ('East', 'West')]
 
-    for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
-        for quadrant, clr in zip(quadrants, color):  # This might be causing issues if 'color' isn't iterable as expected
+    for ax, (quadrants, color_pair) in zip(axs, zip(quadrant_pairs, colors)):
+        for quadrant, color in zip(quadrants, color_pair):
+            all_means = []
+            all_midpoints = []
             for df in dfs:
                 grouped = bin_signal(df, signal, bins, quadrant=quadrant)
-                normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (grouped['mean'].max() - grouped['mean'].min())
-                ax.plot(grouped['bin_mid'], normalized_mean, color=clr, label=f'{quadrant} Mean', alpha=0.5)
+                normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (
+                            grouped['mean'].max() - grouped['mean'].min())
+                all_means.append(normalized_mean)
+                all_midpoints.append(grouped['bin_mid'])
+
+            for mean, midpoint in zip(all_means, all_midpoints):
+                ax.plot(midpoint, mean, color=color, label=f'{quadrant} Mean', alpha=0.5)
 
         ax.set_title(f'{"/".join(quadrants)} Quadrants')
         ax.set_xlabel('x (mm)')
         ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
-        ax.legend(handles=[mpatches.Patch(color=clr, label=quadrant) for quadrant, clr in zip(quadrants, color)])  # Verify this part
+        ax.legend(
+            handles=[mpatches.Patch(color=color, label=quadrant) for quadrant, color in zip(quadrants, color_pair)])
 
     plt.tight_layout()
     plt.savefig('quadrants_plot.png')
