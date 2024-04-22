@@ -31,9 +31,10 @@ def bin_signal(df, signal, bins, quadrant, file_number):
     quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
     grouped = quad_df.groupby('bin_mid')[signal].agg(['mean', 'std']).reset_index()
 
-    file_path = os.path.join(output_folder, f"{quadrant}_{file_number}.csv")
+    # Save the feature name in the filename for clarity
+    file_path = os.path.join(output_folder, f"{quadrant}_{signal}_{file_number}.csv")
     grouped.to_csv(file_path, index=False)
-    logging.info(f"Saved binned data to {file_path}")
+    logging.info(f"Saved binned data for {signal} to {file_path}")
 
 
 def read_and_plot(directory):
@@ -57,27 +58,29 @@ def read_and_plot(directory):
 
 def main():
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
-    n_files = 10
-    max_val = 124
-    exclude = [1, 4, 64, 67]
-    file_numbers = np.random.choice([num for num in range(1, max_val + 1) if num not in exclude], size=n_files,
-                                    replace=False)
-
     signal = 'pyro2'
-    for file_number in file_numbers:
-        file_path = f'{directory}/{file_number}.parquet'
-        if os.path.exists(file_path):
-            df = pd.read_parquet(file_path)
-            df = assign_quadrant(df)
-            df = shift_to_zero(df)
-            bins = np.linspace(df['instantaneous_distance'].min(), df['instantaneous_distance'].max(), 20)
-            for quadrant in ['North', 'East', 'South', 'West']:
-                bin_signal(df, signal, bins, quadrant, file_number)
-        else:
-            logging.warning(f"File {file_path} does not exist.")
+    # Retrieve all parquet files in the directory
+    all_files = [f for f in os.listdir(directory) if f.endswith('.parquet')]
+
+    for filename in all_files:
+        file_path = os.path.join(directory, filename)
+        df = pd.read_parquet(file_path)
+        df = assign_quadrant(df)
+        df = shift_to_zero(df)
+        bins = np.linspace(df['instantaneous_distance'].min(), df['instantaneous_distance'].max(), 40)
+
+        # Extract file number or identifier from filename
+        file_number = filename.split('.')[0]  # Assuming the filename format is 'number.parquet'
+
+        for quadrant in ['North', 'East', 'South', 'West']:
+            bin_signal(df, signal, bins, quadrant, file_number)
+
     logging.info("Plotting binned data.")
     read_and_plot('binned_data')
 
+
+if __name__ == '__main__':
+    main()
 
 if __name__ == '__main__':
     main()
