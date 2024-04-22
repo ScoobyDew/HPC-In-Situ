@@ -5,19 +5,17 @@ import matplotlib.pyplot as plt
 import logging
 import time
 import matplotlib.patches as mpatches
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, filename='NSEW.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 def get_random_files(n, exclude, max_val):
     file_numbers = np.setdiff1d(np.arange(1, max_val + 1), exclude)
     selected_files = np.random.choice(file_numbers, size=n, replace=False)
     return selected_files
 
-
 def assign_quadrant(df):
-    # Directly update quadrant based on conditions
     df['quadrant'] = np.select(
         [df['hatch_angle'] == 0, df['hatch_angle'] == 90, df['hatch_angle'] == 180,
          df['hatch_angle'] == -180, df['hatch_angle'] == -90, df['hatch_angle'] == 270],
@@ -26,56 +24,38 @@ def assign_quadrant(df):
     )
     return df
 
-
 def preprocess_data(df):
-    # Shift the 'instantaneous_distance' to start from zero and assign quadrants
     df['instantaneous_distance'] -= df['instantaneous_distance'].min()
-    df = assign_quadrant(df)
-    # Swap directions for visualization purposes
-    df['quadrant'] = df['quadrant'].replace({'North': 'West', 'West': 'North', 'South': 'East', 'East': 'South'})
-    return df
-
+    return assign_quadrant(df)
 
 def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
-    def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
-        quad_df = df[df['quadrant'] == quadrant].copy()
-        quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
-        quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-        grouped = quad_df.groupby('bin', as_index=False).agg({signal: ['mean', 'std']})
-        grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
-        grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
-        return grouped  # Return the entire DataFrame
+    quad_df = df[df['quadrant'] == quadrant].copy()
+    quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
+    quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+    grouped = quad_df.groupby('bin', as_index=False).agg({signal: ['mean', 'std']})
+    grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
+    grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
+    return grouped
 
-    def plot_quadrants(dfs, bins, signal):
-        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-        colors = ['red', 'blue', 'green', 'orange']
-        quadrant_pairs = [('North', 'South'), ('East', 'West')]
+def plot_quadrants(dfs, bins, signal):
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+    colors = ['red', 'blue', 'green', 'orange']
+    quadrant_pairs = [('North', 'South'), ('East', 'West')]
 
-        for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
-            for quadrant, clr in zip(quadrants, color):
-                all_means = []
-                all_midpoints = []
-                for df in dfs:
-                    grouped = bin_signal(df, signal, bins, quadrant=quadrant)
-                    # Normalize each quadrant's means within each plot call
-                    normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (
-                                grouped['mean'].max() - grouped['mean'].min())
-                    all_means.append(normalized_mean)
-                    all_midpoints.append(grouped['bin_mid'])
-
-                for mean, midpoint in zip(all_means, all_midpoints):
-                    ax.plot(midpoint, mean, color=clr, label=f'{quadrant} Mean', alpha=0.5)
+    for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
+        for quadrant, clr in zip(quadrants, color):
+            for df in dfs:
+                grouped = bin_signal(df, signal, bins, quadrant=quadrant)
+                normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (grouped['mean'].max() - grouped['mean'].min())
+                ax.plot(grouped['bin_mid'], normalized_mean, color=clr, label=f'{quadrant} Mean', alpha=0.5)
 
             ax.set_title(f'{"/".join(quadrants)} Quadrants')
             ax.set_xlabel('x (mm)')
             ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
             ax.legend(handles=[mpatches.Patch(color=clr, label=quadrant) for quadrant, clr in zip(quadrants, color)])
 
-        plt.tight_layout()
-        plt.savefig('quadrants_plot.png')
-
-    # The rest of the main function and additional functions remain the same.
-
+    plt.tight_layout()
+    plt.savefig('quadrants_plot.png')
 
 def main():
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
@@ -104,7 +84,6 @@ def main():
     signal = 'pyro2'
     plot_quadrants(dfs, bins, signal)
     logging.info("Finished plotting.")
-
 
 if __name__ == '__main__':
     main()
