@@ -43,9 +43,9 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
             quad_df = df[df['quadrant'] == quadrant].copy()
             # Convert categorical column to regular Pandas Series
             quad_df['bin'] = pd.cut(quad_df[x].compute(), bins=bins, include_lowest=True, right=True).astype('object')
-            # Calculate bin midpoints directly
-            bin_edges = quad_df['bin'].apply(lambda x: x.left).values.tolist() + [quad_df['bin'].iloc[-1].right]
-            midpoints = [(bin_edges[i] + bin_edges[i+1]) / 2 for i in range(len(bin_edges) - 1)]
+            # Calculate bin midpoints directly from IntervalIndex
+            bin_edges = quad_df['bin'].apply(lambda x: (x.left, x.right)).values.tolist()
+            midpoints = [(left + right) / 2 for left, right in bin_edges]
             quad_df['bin_mid'] = midpoints
             grouped = quad_df.groupby('bin_mid', observed=True)[signal].agg(['mean', 'std']).reset_index()
             valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
@@ -67,6 +67,7 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
     end_time = time.time()
     date_time = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(end_time))
     plt.savefig(f'/mnt/parscratch/users/eia19od/Quadrants/Quadrants_{date_time}.png')
+
 
 
 def main():
