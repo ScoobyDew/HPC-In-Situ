@@ -48,6 +48,8 @@ def read_and_plot(directory):
         if quadrant in quadrants:
             df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
+        else:
+            logging.warning(f"Unexpected quadrant name '{quadrant}' in file {file}")
 
     logging.info('Data loaded and organized by quadrant')
 
@@ -56,19 +58,20 @@ def read_and_plot(directory):
 
     # Interpolate and average for each quadrant and plot
     for quadrant_group, ax in [('North', 'South'), ('East', 'West')]:
-        for quadrant in [quadrant_group[0], quadrant_group[1]]:
-            common_bins, avg_values = interpolate_and_average(quadrant_data[quadrant])
-            if common_bins.size > 0:  # Ensure there's data to plot
-                normalized_avg_values = (avg_values - np.nanmin(avg_values)) / (
-                            np.nanmax(avg_values) - np.nanmin(avg_values))
-                ax.plot(common_bins, normalized_avg_values, color=colors[quadrant], linewidth=2,
-                        label=f"Avg {quadrant}")
+        for quadrant in quadrant_group:
+            try:
+                common_bins, avg_values = interpolate_and_average(quadrant_data[quadrant])
+                if common_bins.size > 0:  # Ensure there's data to plot
+                    normalized_avg_values = (avg_values - np.nanmin(avg_values)) / (np.nanmax(avg_values) - np.nanmin(avg_values))
+                    ax.plot(common_bins, normalized_avg_values, color=colors[quadrant], linewidth=2, label=f"Avg {quadrant}")
+            except KeyError:
+                logging.error(f"No data for quadrant {quadrant}. This might be due to missing files.")
+                continue  # Skip this quadrant if data is missing
             # Plot individual normalized traces
-            for df in quadrant_data[quadrant]:
-                normalized_values = (df['mean'] - np.nanmin(df['mean'])) / (
-                            np.nanmax(df['mean']) - np.nanmin(df['mean']))
+            for df in quadrant_data.get(quadrant, []):
+                normalized_values = (df['mean'] - np.nanmin(df['mean'])) / (np.nanmax(df['mean']) - np.nanmin(df['mean']))
                 ax.plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
-            ax.set_title(f'{quadrant_group[0]}/{quadrant_group[1]} Quadrants')
+            ax.set_title(f'{quadrant_group} Quadrants')
             ax.set_xlabel('Distance')
             ax.set_ylabel('Normalized Mean Value of Pyro2')
             ax.legend()
@@ -78,7 +81,7 @@ def read_and_plot(directory):
     plt.savefig(f'NSEWPlot_{timestamp}.png')
     logging.info(f'Plot saved as NSEWPlot_{timestamp}.png')
 
-
 if __name__ == '__main__':
     directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
     read_and_plot(directory)
+
