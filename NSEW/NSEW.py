@@ -21,13 +21,13 @@ def assign_quadrant(df):
 
     def get_quadrant(angle):
         if angle == 0:
-            return 'East'
+            return 'West'
         elif angle == 90:
             return 'North'
         elif angle == 180 or angle == -180:
-            return 'West'
-        elif angle == -90 or angle == 270:
             return 'South'
+        elif angle == -90 or angle == 270:
+            return 'East'
 
     df['quadrant'] = df['90angle'].apply(get_quadrant)
     return df
