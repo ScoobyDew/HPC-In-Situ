@@ -50,6 +50,11 @@ def read_and_plot(directory):
     # Plot East and West with normalization
     for quadrant in ['East', 'West']:
         for df in quadrant_data[quadrant]:
+            df = df[df['bin_mid'] < 7500]
+
+            # Divide 'bin_mid' by 1000
+            df['bin_mid'] = df['bin_mid'] / 1000
+
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
             axs[1].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
         axs[1].set_title('East/West Quadrants')
