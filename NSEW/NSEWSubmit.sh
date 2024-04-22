@@ -16,7 +16,7 @@
 # Source the Conda initialization script
 
 source /users/eia19od/in_situ/HPC-In-Situ/venv/bin/activate
-python /users/eia19od/in_situ/HPC-In-Situ/NSEW/NSEWsave.py
+python /users/eia19od/in_situ/HPC-In-Situ/NSEW/NSEWread.py
 date
 seff $SLURM_JOBID
 
