@@ -48,10 +48,11 @@ def read_and_plot(directory):
         dfs = quadrant_data[quadrant]
         common_bins, avg_values = interpolate_and_average(dfs)
         normalized_avg_values = (avg_values - avg_values.min()) / (avg_values.max() - avg_values.min())
-        axs[0].plot(common_bins, normalized_avg_values, color='k', linewidth=2)
+
         for df in dfs:
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
             axs[0].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        axs[0].plot(common_bins, normalized_avg_values, color='k', linewidth=2)
         axs[0].set_title('North/South Quadrants')
         axs[0].set_xlabel('Distance')
         axs[0].set_ylabel('Normalized Mean Value of Pyro2')
@@ -63,10 +64,10 @@ def read_and_plot(directory):
         dfs = quadrant_data[quadrant]
         common_bins, avg_values = interpolate_and_average(dfs)
         normalized_avg_values = (avg_values - avg_values.min()) / (avg_values.max() - avg_values.min())
-        axs[1].plot(common_bins, normalized_avg_values, color='k', linewidth=2)
         for df in dfs:
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
             axs[1].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        axs[1].plot(common_bins, normalized_avg_values, color='k', linewidth=2)
         axs[1].set_title('East/West Quadrants')
         axs[1].set_xlabel('Distance')
 
