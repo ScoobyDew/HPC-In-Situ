@@ -44,11 +44,17 @@ def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
     return grouped
 
 
-def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
+
+
+    #def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
     if ax is None:
         raise ValueError("Axis not provided")
 
+    color_dict = dict(zip(quadrants, colors))
+    patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in color_dict.items()]
+
     for quadrant, color in zip(quadrants, colors):
+        means_list = []  # List to store the means of each file
         for idx, df in enumerate(df_list):
             grouped = bin_signal(df, signal, bins, x=x, quadrant=quadrant)
             valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
@@ -58,20 +64,18 @@ def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_dis
 
             # Normalize each quadrant's means within each plot call
             minmax_norm = (means - means.min()) / (means.max() - means.min())
+            means_list.append(minmax_norm)
 
-            ax.plot(midpoints, minmax_norm, color=color,
-                    label=f'File {idx + 1} - {quadrant}', alpha=0.3)
+            ax.plot(midpoints, minmax_norm, color=color, alpha=0.3)
+
+        # Calculate and plot the average of minmax_norm for each direction
+        avg_means = np.mean(means_list, axis=0)
+        ax.plot(midpoints, avg_means, color=color, linestyle='--', linewidth=2)
 
     ax.set_title(f'{"/".join(quadrants)} Quadrants')
     ax.set_xlabel('x (mm)')
     ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
-
-    # Create a list of patches for the legend
-    # Create a dictionary that maps each direction to its color
-    color_dict = dict(zip(quadrants, colors))
-    patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in color_dict.items()]
     ax.legend(handles=patches)  # Use the patches for the legend
-
 
 def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
     quadrant_pairs = [('North', 'South'), ('East', 'West')]
