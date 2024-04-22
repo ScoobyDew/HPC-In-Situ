@@ -27,6 +27,49 @@ def read_and_plot(directory):
 
     logging.info('Read data from CSV files')
 
+    # For each unique quadrant bin the data and plot the mean
+    for quadrant, color in colors.items():
+        for df in quadrant_data[quadrant]:
+            bins = pd.cut(df['instantaneous_distance'], bins=20, include_lowest=True, right=True)
+            df['bin'] = bins
+            df['bin_mid'] = df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+            grouped = df.groupby('bin', as_index=False, observed=True).agg({'pyro2': ['mean', 'std']})
+            grouped.columns = ['bin', 'mean', 'std']
+            grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
+            quadrant_data[quadrant] = grouped
+
+    logging.info('Binned data for each quadrant')
+
+    # Plot the average values for each quadrant
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    for quadrant in ['North', 'South']:
+        for df in quadrant_data[quadrant]:
+            normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
+            plt.plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        plt.title('North/South Quadrants')
+        plt.xlabel('Distance')
+        plt.ylabel('Normalized Mean Value of Pyro2')
+
+    plt.legend(handles=[mpatches.Patch(color=color, label=quadrant) for quadrant, color in colors.items()][:2])
+
+    plt.subplot(1, 2, 2)
+
+    for quadrant in ['East', 'West']:
+        for df in quadrant_data[quadrant]:
+            normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
+            plt.plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        plt.title('East/West Quadrants')
+        plt.xlabel('Distance')
+
+    plt.legend(handles=[mpatches.Patch(color=color, label=quadrant) for quadrant, color in colors.items()][2:])
+
+    plt.tight_layout()
+    # Save the plot to a file with a timestamp
+    timestamp = time.strftime('%Y%m%d-%H%M%S')
+    plt.savefig(f'NSEWavg_{timestamp}.png')
+
     # Create patches for the legend based on quadrant colors
     patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in colors.items()]
 
@@ -40,6 +83,8 @@ def read_and_plot(directory):
         axs[0].set_ylabel('Normalized Mean Value of Pyro2')
 
     axs[0].legend(handles=patches[:2])  # North and South patches
+    # Set xlim to 7500 for both plots
+    axs[0].set_xlim(0, 7500)
 
     # Plot East and West with normalization
     for quadrant in ['East', 'West']:
@@ -52,6 +97,8 @@ def read_and_plot(directory):
     logging.info('Plotting North/South and East/West quadrants')
 
     axs[1].legend(handles=patches[2:])  # East and West patches
+    # Set xlim to 7500 for both plots
+    axs[1].set_xlim(0, 7500)
 
     plt.tight_layout()
 
