@@ -41,34 +41,41 @@ def read_and_plot(directory):
     colors = {'North': 'red', 'South': 'blue', 'East': 'green', 'West': 'orange'}
 
     quadrant_data = {quad: [] for quad in quadrants}
-    all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
 
+    all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
     for file in all_files:
+        # Ensure we extract the full quadrant name correctly
         quadrant = file.split('_')[0]
         if quadrant in quadrants:
             df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
+        else:
+            logging.warning(f"Unexpected quadrant name '{quadrant}' in file {file}")
 
-    for quad, dfs in quadrant_data.items():
-        logging.info(f"{quad} has {len(dfs)} data frames.")
+    logging.info('Data loaded and organized by quadrant')
 
-    # Plotting
+    # Create patches for the legend based on quadrant colors
+    patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in colors.items()]
+
+    # Interpolate and average for each quadrant and plot
     for quadrant_group, ax in [('North', 'South'), ('East', 'West')]:
         for quadrant in quadrant_group:
-            common_bins, avg_values = interpolate_and_average(quadrant_data[quadrant])
-            if common_bins is None or avg_values is None:
-                logging.error(f"Failed to process data for {quadrant}.")
+            try:
+                # Ensure correct quadrant name is used
+                common_bins, avg_values = interpolate_and_average(quadrant_data[quadrant])
+                if common_bins is None or avg_values is None:
+                    logging.error(f"Failed to process data for {quadrant}.")
+                    continue
+
+                if avg_values is not None:
+                    normalized_avg_values = (avg_values - np.nanmin(avg_values)) / (np.nanmax(avg_values) - np.nanmin(avg_values))
+                    ax.plot(common_bins, normalized_avg_values, color=colors[quadrant], linewidth=2, label=f"Avg {quadrant}")
+            except KeyError as e:
+                logging.error(f"No data for quadrant {quadrant}. Error: {e}")
                 continue
 
-            if avg_values is not None:
-                normalized_avg_values = (avg_values - np.nanmin(avg_values)) / (
-                            np.nanmax(avg_values) - np.nanmin(avg_values))
-                ax.plot(common_bins, normalized_avg_values, color=colors[quadrant], linewidth=2,
-                        label=f"Avg {quadrant}")
-
             for df in quadrant_data.get(quadrant, []):
-                normalized_values = (df['mean'] - np.nanmin(df['mean'])) / (
-                            np.nanmax(df['mean']) - np.nanmin(df['mean']))
+                normalized_values = (df['mean'] - np.nanmin(df['mean'])) / (np.nanmax(df['mean']) - np.nanmin(df['mean']))
                 ax.plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
 
             ax.set_title(f'{quadrant_group} Quadrants')
@@ -80,6 +87,11 @@ def read_and_plot(directory):
     timestamp = time.strftime('%Y%m%d-%H%M%S')
     plt.savefig(f'NSEWPlot_{timestamp}.png')
     logging.info(f'Plot saved as NSEWPlot_{timestamp}.png')
+
+if __name__ == '__main__':
+    directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
+    read_and_plot(directory)
+
 
 
 if __name__ == '__main__':
