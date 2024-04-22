@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 import time
-
+import matplotlib.patches as mpatches
 # Configure logging
 logging.basicConfig(level=logging.INFO, filename='NSEW.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,43 +37,44 @@ def preprocess_data(df):
 
 
 def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
-    quad_df = df[df['quadrant'] == quadrant].copy()
-    quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
-    quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-    # Corrected aggregation to use a list
-    grouped = quad_df.groupby('bin', as_index=False).agg({
-        signal: ['mean', 'std']
-    }).rename(columns={'mean': 'mean', 'std': 'std'})
-    grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
-    grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
-    return grouped[['bin_mid', 'mean', 'std']]
+    def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
+        quad_df = df[df['quadrant'] == quadrant].copy()
+        quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
+        quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+        grouped = quad_df.groupby('bin', as_index=False).agg({signal: ['mean', 'std']})
+        grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
+        grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
+        return grouped  # Return the entire DataFrame
 
+    def plot_quadrants(dfs, bins, signal):
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        colors = ['red', 'blue', 'green', 'orange']
+        quadrant_pairs = [('North', 'South'), ('East', 'West')]
 
-def plot_quadrants(dfs, bins, signal):
-    # Set up plotting
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))
-    colors = ['red', 'blue', 'green', 'orange']
-    quadrant_pairs = [('North', 'South'), ('East', 'West')]
+        for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
+            for quadrant, clr in zip(quadrants, color):
+                all_means = []
+                all_midpoints = []
+                for df in dfs:
+                    grouped = bin_signal(df, signal, bins, quadrant=quadrant)
+                    # Normalize each quadrant's means within each plot call
+                    normalized_mean = (grouped['mean'] - grouped['mean'].min()) / (
+                                grouped['mean'].max() - grouped['mean'].min())
+                    all_means.append(normalized_mean)
+                    all_midpoints.append(grouped['bin_mid'])
 
-    for ax, (quadrants, color) in zip(axs, zip(quadrant_pairs, colors)):
-        for quadrant in quadrants:
-            means, midpoints = [], []
-            for df in dfs:
-                mean, midpoint = bin_signal(df, signal, bins, quadrant=quadrant)
-                means.append(mean)
-                midpoints.append(midpoint)
-            # Normalize and plot
-            for mean, midpoint in zip(means, midpoints):
-                normalized_mean = (mean - np.min(mean)) / (np.max(mean) - np.min(mean))
-                ax.plot(midpoint, normalized_mean, color=color, label=f'{quadrant} Mean')
+                for mean, midpoint in zip(all_means, all_midpoints):
+                    ax.plot(midpoint, mean, color=clr, label=f'{quadrant} Mean', alpha=0.5)
 
-        ax.set_title(f'{"/".join(quadrants)} Quadrants')
-        ax.set_xlabel('x (mm)')
-        ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
-        ax.legend()
+            ax.set_title(f'{"/".join(quadrants)} Quadrants')
+            ax.set_xlabel('x (mm)')
+            ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
+            ax.legend(handles=[mpatches.Patch(color=clr, label=quadrant) for quadrant, clr in zip(quadrants, color)])
 
-    plt.tight_layout()
-    plt.savefig('quadrants_plot.png')
+        plt.tight_layout()
+        plt.savefig('quadrants_plot.png')
+
+    # The rest of the main function and additional functions remain the same.
 
 
 def main():
