@@ -62,7 +62,7 @@ def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_dis
             ax.plot(midpoints, minmax_norm, color=color,
                     label=f'File {idx + 1} - {quadrant}', alpha=0.3)
 
-    ax.set_title(f'{"/".join(quadrants)} Quadrants')
+    ax.set_title(f'{"/".join(quadrants)} Scan Directions')
     ax.set_xlabel('x (mm)')
     ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
 
@@ -79,11 +79,13 @@ def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
     for pair, colors, ax in zip(quadrant_pairs, color_pairs, axs.flatten()):
         plot_quadrant(dfs, pair, bins, signal, colors, x=x, ax=ax)
+
     plt.tight_layout()
 
     # Save to 'quadrants' directory
     if not os.path.exists('quadrants'):
         os.makedirs('quadrants')
+
     date = time.strftime('%Y-%m-%d_%H-%M-%S')
     plt.savefig(f'quadrants/quadrants_{date}.png')
 
