@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import warnings
 import logging
 import time
+import matplotlib.patches as mpatches
 
 logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-Situ/NSEW/NSEW.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,6 +32,9 @@ def assign_quadrant(df):
     df['quadrant'] = df['90angle'].apply(get_quadrant)
     return df
 
+def shift_to_zero(df):
+    df['instantaneous_distance'] -= df['instantaneous_distance'].min()
+    return df
 
 def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
     quad_df = df[df['quadrant'] == quadrant].copy()
@@ -60,8 +64,13 @@ def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_dis
 
     ax.set_title(f'{"/".join(quadrants)} Quadrants')
     ax.set_xlabel('x (mm)')
-    ax.set_ylabel(f'$V_{{p}}\\prime$')
-    # ax.legend()
+    ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
+
+    # Create a list of patches for the legend
+    # Create a dictionary that maps each direction to its color
+    color_dict = dict(zip(quadrants, colors))
+    patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in color_dict.items()]
+    ax.legend(handles=patches)  # Use the patches for the legend
 
 
 def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
@@ -92,8 +101,16 @@ def main():
         if os.path.exists(file_path):
             df = pd.read_parquet(file_path)
             df = assign_quadrant(df)
+
+            # Shift the instantaneous_distance to start from 0
+            logging.info(f"Shifting instantaneous_distance to start from 0 for {file_path}")
+            df = shift_to_zero(df)
+
             dfs.append(df)
             logging.info(f"Loaded {file_path}")
+
+
+
         else:
             logging.warning(f"File {file_path} does not exist.")
     if not dfs:
