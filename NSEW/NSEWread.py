@@ -44,8 +44,8 @@ def read_and_plot(directory):
 
     all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
     for file in all_files:
-        # Ensure we extract the full quadrant name correctly
-        quadrant = file.split('_')[0]
+        parts = file.split('_')  # Split the file name by underscore
+        quadrant = parts[0]  # The first part will be the quadrant name
         if quadrant in quadrants:
             df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
@@ -61,12 +61,10 @@ def read_and_plot(directory):
     for quadrant_group, ax in [('North', 'South'), ('East', 'West')]:
         for quadrant in quadrant_group:
             try:
-                # Ensure correct quadrant name is used
                 common_bins, avg_values = interpolate_and_average(quadrant_data[quadrant])
                 if common_bins is None or avg_values is None:
                     logging.error(f"Failed to process data for {quadrant}.")
                     continue
-
                 if avg_values is not None:
                     normalized_avg_values = (avg_values - np.nanmin(avg_values)) / (np.nanmax(avg_values) - np.nanmin(avg_values))
                     ax.plot(common_bins, normalized_avg_values, color=colors[quadrant], linewidth=2, label=f"Avg {quadrant}")
@@ -87,12 +85,6 @@ def read_and_plot(directory):
     timestamp = time.strftime('%Y%m%d-%H%M%S')
     plt.savefig(f'NSEWPlot_{timestamp}.png')
     logging.info(f'Plot saved as NSEWPlot_{timestamp}.png')
-
-if __name__ == '__main__':
-    directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
-    read_and_plot(directory)
-
-
 
 if __name__ == '__main__':
     directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
