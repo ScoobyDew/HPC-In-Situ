@@ -7,7 +7,7 @@ import os
 import time
 import logging
 
-logging.basicConfig(level=logging.INFO, filename='NSEW.log', filemode='w',
+logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-Situ/NSEW/NSEW.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 
