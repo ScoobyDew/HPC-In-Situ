@@ -82,7 +82,7 @@ def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
 def main():
     start_time = time.time()
     directory = '/mnt/parscratch/users/eia19od/Cleaned'
-    n_files = 15
+    n_files = 60
     max_val = 124
     exclude = [1, 4, 64, 67]
     selected_files = get_random_files(n_files, exclude, max_val)
