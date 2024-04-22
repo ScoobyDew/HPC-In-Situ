@@ -72,7 +72,7 @@ def plot_quadrants(dfs, bins, signal):
 
 
 def main():
-    directory = 'D:/Cleaned'
+    directory = '/mnt/parscratch/users/eia19od/Cleaned'
     n_files = 15
     max_val = 124
     exclude = [1, 4, 64, 67]
