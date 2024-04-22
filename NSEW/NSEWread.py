@@ -33,6 +33,12 @@ def read_and_plot(directory):
     # Plot North and South with normalization
     for quadrant in ['North', 'South']:
         for df in quadrant_data[quadrant]:
+            # Filter 'bin_mid' to be less than 7500
+            df = df[df['bin_mid'] < 7500]
+
+            # Divide 'bin_mid' by 1000
+            df['bin_mid'] = df['bin_mid'] / 1000
+
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
             axs[0].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
         axs[0].set_title('North/South Quadrants')
