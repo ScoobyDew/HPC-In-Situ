@@ -44,9 +44,7 @@ def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
     return grouped
 
 
-
-
-    #def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
+def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
     if ax is None:
         raise ValueError("Axis not provided")
 
