@@ -90,7 +90,7 @@ def main():
         return
 
     bins = np.linspace(min(df['instantaneous_distance'].min() for df in dfs),
-                       max(df['instantaneous_distance'].max() for df in dfs), 100)
+                       max(df['instantaneous_distance'].max() for df in dfs), 30)
     signal = 'pyro2'
     plot_quadrants(dfs, bins, signal)
     logging.info("Finished plotting.")
