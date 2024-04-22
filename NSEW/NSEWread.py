@@ -34,7 +34,7 @@ def read_and_plot(directory):
     for quadrant in ['North', 'South']:
         for df in quadrant_data[quadrant]:
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
-            axs[0].plot(df['bin_mid'], normalized_values, color=colors[quadrant])
+            axs[0].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
         axs[0].set_title('North/South Quadrants')
         axs[0].set_xlabel('Distance')
         axs[0].set_ylabel('Normalized Mean Value of Pyro2')
@@ -45,7 +45,7 @@ def read_and_plot(directory):
     for quadrant in ['East', 'West']:
         for df in quadrant_data[quadrant]:
             normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
-            axs[1].plot(df['bin_mid'], normalized_values, color=colors[quadrant])
+            axs[1].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
         axs[1].set_title('East/West Quadrants')
         axs[1].set_xlabel('Distance')
 
