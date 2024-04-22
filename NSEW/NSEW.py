@@ -2,14 +2,13 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import warnings
-import os
+import dask.dataframe as dd
+from dask import delayed
 import time
 import logging
 
 logging.basicConfig(level=logging.INFO, filename='/users/eia19od/in_situ/HPC-In-Situ/NSEW/NSEW.log', filemode='w',
                     format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 
 def get_random_files(n, exclude, max_val):
@@ -35,55 +34,34 @@ def assign_quadrant(df):
     return df
 
 
-def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
-    quad_df = df[df['quadrant'] == quadrant].copy()
-    quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
-    quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-    grouped = quad_df.groupby('bin_mid', observed=True)[signal].agg(['mean', 'std']).reset_index()
-    return grouped
-
-
-def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
-    if ax is None:
-        raise ValueError("Axis not provided")
-
-    for quadrant, color in zip(quadrants, colors):
-        for idx, df in enumerate(df_list):
-            grouped = bin_signal(df, signal, bins, x=x, quadrant=quadrant)
+def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distance'):
+    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
+    for quadrant, color, ax in zip(quadrants, colors, axs.flatten()):
+        for idx, df in enumerate(dfs):
+            quad_df = df[df['quadrant'] == quadrant].copy()
+            quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
+            quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+            grouped = quad_df.groupby('bin_mid', observed=True)[signal].agg(['mean', 'std']).reset_index()
             valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
-
             midpoints = grouped['bin_mid'][valid_mask]
             means = grouped['mean'][valid_mask]
-
-            # Normalize each quadrant's means within each plot call
             minmax_norm = (means - means.min()) / (means.max() - means.min())
-
-            ax.plot(midpoints, minmax_norm, color=color,
-                    label=f'File {idx + 1} - {quadrant}', alpha=0.5)
-
-    ax.set_title(f'{"/".join(quadrants)} Quadrants')
-    ax.set_xlabel('x (mm)')
-    ax.set_ylabel(f'$V_{{p}}\\prime$')
-    # ax.legend()
-
-
-def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
-    quadrant_pairs = [('North', 'South'), ('East', 'West')]
-    color_pairs = [('red', 'blue'), ('green', 'orange')]
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
-    for pair, colors, ax in zip(quadrant_pairs, color_pairs, axs.flatten()):
-        plot_quadrant(dfs, pair, bins, signal, colors, x=x, ax=ax)
+            ax.plot(midpoints, minmax_norm, color=color, label=f'File {idx + 1} - {quadrant}', alpha=0.5)
+        ax.set_title(f'{quadrant} Quadrant')
+        ax.set_xlabel('x (mm)')
+        ax.set_ylabel(f'$V_{{p}}\\prime$')
+        ax.legend()
     plt.tight_layout()
 
     # Save the plot to directory if it does not exist
     if not os.path.exists('/mnt/parscratch/users/eia19od/Quadrants'):
         os.makedirs('/mnt/parscratch/users/eia19od/Quadrants')
 
-
     # Create a string with the current date and time
     end_time = time.time()
     date_time = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(end_time))
     plt.savefig(f'/mnt/parscratch/users/eia19od/Quadrants/Quadrants_{date_time}.png')
+
 
 def main():
     time_start = time.time()
@@ -96,19 +74,24 @@ def main():
     for file_number in selected_files:
         file_path = f'{directory}/{file_number}.parquet'
         if os.path.exists(file_path):
-            df = pd.read_parquet(file_path)
-            df = assign_quadrant(df)
+            df = dd.read_parquet(file_path)  # Using Dask to lazily load data
+            df = df.map_partitions(assign_quadrant)  # Apply assign_quadrant function to each partition
             dfs.append(df)
-            print(f"Loaded {file_path}")
+            logging.info(f"Loaded {file_path}")
         else:
-            print(f"File {file_path} does not exist.")
+            logging.warning(f"File {file_path} does not exist.")
     if not dfs:
-        print("No data files were loaded.")
+        logging.warning("No data files were loaded.")
         return
-    bins = np.linspace(min(df['instantaneous_distance'].min() for df in dfs),
-                       max(df['instantaneous_distance'].max() for df in dfs), 20)
+
+    bins = np.linspace(min(df['instantaneous_distance'].min().compute() for df in dfs),
+                       max(df['instantaneous_distance'].max().compute() for df in dfs), 20)
+    logging.info(f"Bins: {bins}")
+
     signal = 'pyro2'
-    plot_quadrants(dfs, bins, signal)
+    logging.info(f"Plotting quadrants.")
+    plot_quadrant(dfs, ['North', 'South'], bins, signal, ['red', 'blue'])
+    plot_quadrant(dfs, ['East', 'West'], bins, signal, ['green', 'orange'])
 
 
 if __name__ == '__main__':
