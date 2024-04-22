@@ -1,4 +1,5 @@
 import time
+
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
@@ -20,43 +21,46 @@ def read_and_plot(directory):
     all_files = [f for f in os.listdir(directory) if f.endswith('.csv')]
     for file in all_files:
         quadrant = file.split('_')[0]
-        df = pd.read_csv(os.path.join(directory, file))
-        if 'instantaneous_distance' in df.columns and quadrant in quadrants:
+        if quadrant in quadrants:
+            df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
-        else:
-            logging.warning(f"Missing 'instantaneous_distance' in {file} or incorrect quadrant {quadrant}")
 
-    logging.info('Data loaded and organized by quadrant')
+    logging.info('Read data from CSV files')
 
-    for quadrant, color in colors.items():
+    # Create patches for the legend based on quadrant colors
+    patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in colors.items()]
+
+    # Plot North and South with normalization
+    for quadrant in ['North', 'South']:
         for df in quadrant_data[quadrant]:
-            bins = pd.cut(df['instantaneous_distance'], bins=20, include_lowest=True, right=True)
-            df['bin'] = bins
-            df['bin_mid'] = df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
-            grouped = df.groupby('bin_mid').agg({'pyro2': ['mean', 'std']}).reset_index()
-            grouped.columns = ['bin_mid', 'mean', 'std']
-            quadrant_data[quadrant] = grouped
-            logging.info(f"Processed data for {quadrant}: {grouped.head()}")  # Log some of the processed data
+            normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
+            axs[0].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        axs[0].set_title('North/South Quadrants')
+        axs[0].set_xlabel('Distance')
+        axs[0].set_ylabel('Normalized Mean Value of Pyro2')
 
-    # Plot the average values for each quadrant
-    for quadrant_group, ax in [('North', 'South'), ('East', 'West')]:
-        for quadrant in quadrant_group:
-            df = quadrant_data[quadrant]
-            if not df.empty:
-                normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
-                ax.plot(df['bin_mid'], normalized_values, color=colors[quadrant], label=f"{quadrant} Average", alpha=0.7)
-            else:
-                logging.warning(f"No data to plot for {quadrant}")
+    axs[0].legend(handles=patches[:2])  # North and South patches
 
-        ax.set_title(f'{quadrant_group} Quadrants')
-        ax.set_xlabel('Distance')
-        ax.set_ylabel('Normalized Mean Value of Pyro2')
-        ax.legend()
+    # Plot East and West with normalization
+    for quadrant in ['East', 'West']:
+        for df in quadrant_data[quadrant]:
+            normalized_values = (df['mean'] - df['mean'].min()) / (df['mean'].max() - df['mean'].min())
+            axs[1].plot(df['bin_mid'], normalized_values, color=colors[quadrant], alpha=0.2)
+        axs[1].set_title('East/West Quadrants')
+        axs[1].set_xlabel('Distance')
+
+    logging.info('Plotting North/South and East/West quadrants')
+
+    axs[1].legend(handles=patches[2:])  # East and West patches
 
     plt.tight_layout()
+
+    # Save the plot to a file with a timestamp
     timestamp = time.strftime('%Y%m%d-%H%M%S')
-    plt.savefig(f'NSEWavg_{timestamp}.png')
-    logging.info(f'Plot saved as NSEWavg_{timestamp}.png')
+    plt.savefig(f'NSEWPlot_{timestamp}.png')
+    logging.info(f'Plot saved as NSEWPlot_{timestamp}.png')
+
+
 
 if __name__ == '__main__':
     directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
