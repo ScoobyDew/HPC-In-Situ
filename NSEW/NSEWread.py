@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.INFO, filename='NSEWPlotting.log', filemode='w
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def read_and_plot(directory):
+    logging.info(f"Reading and plotting data from {directory}")
+
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Two subplots on one row
     quadrants = ['North', 'South', 'East', 'West']
     colors = {'North': 'red', 'South': 'blue', 'East': 'green', 'West': 'orange'}  # Unique colors for each quadrant
@@ -24,6 +26,8 @@ def read_and_plot(directory):
         if quadrant in quadrants:
             df = pd.read_csv(os.path.join(directory, file))
             quadrant_data[quadrant].append(df)
+
+    logging.info(f"Loaded {len(all_files)} files from {directory}")
 
     # Plotting North and South on the first subplot with normalization
     for quadrant in ['North', 'South']:
@@ -48,11 +52,12 @@ def read_and_plot(directory):
 
     #
     date = time.strftime('%Y-%m-%d_%H-%M-%S')
-    plt.savefig('binned_data_plot.png')
+    plt.savefig(f'binned_data_plot.png')
+    logging.info(f"Plot saved as binned_data_plot.png at {date}")
 
 # Example usage assuming the binned data is stored in the 'binned_data' directory
 read_and_plot('binned_data')
 
 if __name__ == '__main__':
     directory = '/users/eia19od/in_situ/HPC-In-Situ/NSEW/binned_data'
-    read_and_plot()
+    read_and_plot(directory)
