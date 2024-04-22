@@ -40,9 +40,9 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
     fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
     for quadrant, color, ax in zip(quadrants, colors, axs.flatten()):
         for idx, df in enumerate(dfs):
-            quad_df = df[df['quadrant'] == quadrant].copy()
+            quad_df = df[df['quadrant'] == quadrant].compute()  # Ensure Dask dataframe is fully computed
             # Convert categorical column to regular Pandas Series
-            quad_df['bin'] = pd.cut(quad_df[x].compute(), bins=bins, include_lowest=True, right=True).astype('object')
+            quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True).astype('object')
             # Calculate bin midpoints directly from IntervalIndex
             bin_edges = quad_df['bin'].values
             midpoints = [(interval.left + interval.right) / 2 for interval in bin_edges]
@@ -67,7 +67,6 @@ def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distanc
     end_time = time.time()
     date_time = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(end_time))
     plt.savefig(f'/mnt/parscratch/users/eia19od/Quadrants/Quadrants_{date_time}.png')
-
 
 
 def main():
