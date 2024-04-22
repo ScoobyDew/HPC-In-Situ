@@ -44,45 +44,34 @@ def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
     return grouped
 
 
-# N
-def plot_quadrant(dfs, quadrants, bins, signal, colors, x='instantaneous_distance'):
+def plot_quadrant(df_list, quadrants, bins, signal, colors, x='instantaneous_distance', ax=None):
+    if ax is None:
+        raise ValueError("Axis not provided")
+
+    for quadrant, color in zip(quadrants, colors):
+        for idx, df in enumerate(df_list):
+            grouped = bin_signal(df, signal, bins, x=x, quadrant=quadrant)
+            valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
+
+            midpoints = grouped['bin_mid'][valid_mask]
+            means = grouped['mean'][valid_mask]
+
+            # Normalize each quadrant's means within each plot call
+            minmax_norm = (means - means.min()) / (means.max() - means.min())
+
+            ax.plot(midpoints, minmax_norm, color=color,
+                    label=f'File {idx + 1} - {quadrant}', alpha=0.3)
+
+    ax.set_title(f'{"/".join(quadrants)} Quadrants')
+    ax.set_xlabel('x (mm)')
+    ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
+
+    # Create a list of patches for the legend
+    # Create a dictionary that maps each direction to its color
     color_dict = dict(zip(quadrants, colors))
     patches = [mpatches.Patch(color=color, label=quadrant) for quadrant, color in color_dict.items()]
+    ax.legend(handles=patches)  # Use the patches for the legend
 
-    fig, axs = plt.subplots(1, 2, figsize=(12, 6))  # Adjust subplot layout to horizontal
-    for quadrant, color, ax in zip(quadrants, colors, axs.flatten()):
-        means_list = []
-        for idx, df in enumerate(dfs):
-            quad_df = df[df['quadrant'] == quadrant].copy()
-            # Convert categorical column to regular Pandas Series
-            quad_df['bin'] = pd.cut(quad_df[x].compute(), bins=bins, include_lowest=True, right=True).astype('object')
-            grouped = quad_df.groupby('bin', observed=True)[signal].agg(['mean', 'std']).reset_index()
-            valid_mask = np.isfinite(grouped['mean']) & np.isfinite(grouped['std'])
-            means = grouped['mean'][valid_mask]
-            means_list.append(means)
-
-        # Ensure all arrays in means_list have the same length by padding with NaNs if necessary
-        max_length = max(len(means) for means in means_list)
-        padded_means_list = [np.concatenate([means, np.full(max_length - len(means), np.nan)]) for means in means_list]
-
-        # Calculate the mean across dataframes
-        avg_means = np.nanmean(padded_means_list, axis=0)
-        ax.plot(bins[:-1], avg_means, color=color, label=f'{quadrant} Quadrant', alpha=0.5)
-
-        ax.set_title(f'{"/".join(quadrants)} Quadrants')
-        ax.set_xlabel('x (mm)')
-        ax.set_ylabel(f'$V^*_{{pyro}}$ mV')
-        ax.legend(handles=patches)  # Use the patches for the legend
-    plt.tight_layout()
-
-    # Save the plot to directory if it does not exist
-    if not os.path.exists('/mnt/parscratch/users/eia19od/Quadrants'):
-        os.makedirs('/mnt/parscratch/users/eia19od/Quadrants')
-
-    # Create a string with the current date and time
-    end_time = time.time()
-    date_time = time.strftime('%Y-%m-%d_%H-%M-%S', time.localtime(end_time))
-    plt.savefig(f'/mnt/parscratch/users/eia19od/Quadrants/Quadrants_{date_time}.png')
 
 def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
     quadrant_pairs = [('North', 'South'), ('East', 'West')]
