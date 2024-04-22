@@ -71,12 +71,17 @@ def plot_quadrants(dfs, bins, signal, x='instantaneous_distance'):
     for pair, colors, ax in zip(quadrant_pairs, color_pairs, axs.flatten()):
         plot_quadrant(dfs, pair, bins, signal, colors, x=x, ax=ax)
     plt.tight_layout()
-    plt.show()
+
+    # Save to 'quadrants' directory
+    if not os.path.exists('quadrants'):
+        os.makedirs('quadrants')
+    date = time.strftime('%Y-%m-%d_%H-%M-%S')
+    plt.savefig(f'quadrants/quadrants_{date}.png')
 
 
 def main():
     start_time = time.time()
-    directory = 'D:/Cleaned'
+    directory = '/mnt/parscratch/users/eia19od/Cleaned'
     n_files = 15
     max_val = 124
     exclude = [1, 4, 64, 67]
