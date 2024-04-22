@@ -37,11 +37,16 @@ def preprocess_data(df):
 
 
 def bin_signal(df, signal, bins, x='instantaneous_distance', quadrant=None):
-    # Filter and bin the data for a given quadrant
-    quad_df = df[df['quadrant'] == quadrant]
+    quad_df = df[df['quadrant'] == quadrant].copy()
     quad_df['bin'] = pd.cut(quad_df[x], bins=bins, include_lowest=True, right=True)
-    grouped = quad_df.groupby('bin')['mean', 'std'].agg({'mean': 'mean', 'std': 'std'}).reset_index()
-    return grouped['mean'], quad_df['bin'].apply(lambda b: b.mid)
+    quad_df['bin_mid'] = quad_df['bin'].apply(lambda b: b.mid if not pd.isna(b) else np.nan)
+    # Corrected aggregation to use a list
+    grouped = quad_df.groupby('bin', as_index=False).agg({
+        signal: ['mean', 'std']
+    }).rename(columns={'mean': 'mean', 'std': 'std'})
+    grouped.columns = ['bin', 'mean', 'std']  # Flatten the MultiIndex for easier access
+    grouped['bin_mid'] = grouped['bin'].apply(lambda b: b.mid)
+    return grouped[['bin_mid', 'mean', 'std']]
 
 
 def plot_quadrants(dfs, bins, signal):
