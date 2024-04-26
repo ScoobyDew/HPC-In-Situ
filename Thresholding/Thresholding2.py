@@ -120,6 +120,27 @@ def main():
     plt.ylabel('Speed (mm/s)')
     plt.savefig('/mnt/parscratch/users/eia19od/violins/Speed_colored.png')
 
+    plt.figure(figsize=(12, 8))
+    sns.violinplot(x='RegionLabel', y='Power (W)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
+    plt.title('Violin Plot of E*0 by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Speed (mm/s)')
+    plt.savefig('/mnt/parscratch/users/eia19od/violins/Speed_colored.png')
+
+    # Ensure 'Keyhole' is a boolean for plotting
+    final_merged_data['Keyhole'] = final_merged_data['Keyhole'].astype(bool)
+
+    # Plotting count plot for Keyhole variable across different RegionLabels
+    logging.info("Plotting count plot for Keyhole variable.")
+    plt.figure(figsize=(10, 6))
+    ax = sns.countplot(x='RegionLabel', hue='Keyhole', data=computed_data, palette="pastel")
+    ax.set_title('Count of Keyhole States by Region Label')
+    ax.set_xlabel('Region Label')
+    ax.set_ylabel('Count')
+    plt.legend(title='Keyhole State', loc='upper right')
+    plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Keyhole_Counts.png')
+    plt.close()
+
     logging.info("Colored violin plots created and saved successfully.")
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
