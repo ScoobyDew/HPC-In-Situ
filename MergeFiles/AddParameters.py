@@ -18,7 +18,9 @@ def main():
         'pyro2',
         'mp_width',
         'mp_length',
-        'mp_intensity'
+        'mp_intensity',
+        'Keyhole',
+
     ]
 
     # Read the merged parquet file
@@ -65,7 +67,7 @@ def main():
     df = df.reset_index(drop=True)
 
     # Save the processed DataFrame to a new parquet file
-    output_file = '/mnt/parscratch/users/eia19od/combined_params.parquet'
+    output_file = '/mnt/parscratch/users/eia19od/combined_params_wkey.parquet'
     try:
         df.to_parquet(output_file)
         logging.info(f"Saved processed data to {output_file}")

@@ -38,6 +38,7 @@ def main():
 
     logging.info("Reading the main and labeled datasets using Dask.")
     main_data = dd.read_parquet(main_data_path)
+
     # downsample main_data to .01%
     main_data = main_data.sample(frac=0.0001)
     labeled_data = dd.read_csv(labeled_data_path)
@@ -64,6 +65,9 @@ def main():
     # Merge processing parameters with merged_data on 'Part Number'
     logging.info("Merging with processing parameters.")
     final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
+    logging.info(f"Columns in final merged data: {final_merged_data.columns}")
+
+    # Log the column names in the final merged data
     logging.info(f"Columns in final merged data: {final_merged_data.columns}")
 
     # Remove RegionLabel == 0
@@ -110,7 +114,7 @@ def main():
     plt.savefig('/mnt/parscratch/users/eia19od/violins/Power_colored.png')
 
     plt.figure(figsize=(12, 8))
-    sns.violinplot(x='RegionLabel', y='Speed (mm/s)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
+    sns.violinplot(x='RegionLabel', y='Power (W)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
     plt.title('Violin Plot of E*0 by Region Label')
     plt.xlabel('Region Label')
     plt.ylabel('Speed (mm/s)')
