@@ -114,18 +114,18 @@ def main():
     plt.savefig('/mnt/parscratch/users/eia19od/violins/Power_colored.png')
 
     plt.figure(figsize=(12, 8))
-    sns.violinplot(x='RegionLabel', y='Power (W)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
+    sns.violinplot(x='RegionLabel', y='Speed (mm/s)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
     plt.title('Violin Plot of E*0 by Region Label')
     plt.xlabel('Region Label')
     plt.ylabel('Speed (mm/s)')
     plt.savefig('/mnt/parscratch/users/eia19od/violins/Speed_colored.png')
 
     plt.figure(figsize=(12, 8))
-    sns.violinplot(x='RegionLabel', y='Power (W)', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
+    sns.violinplot(x='RegionLabel', y='Focus', hue='RegionLabel', data=computed_data, palette=palette, legend=False)
     plt.title('Violin Plot of E*0 by Region Label')
     plt.xlabel('Region Label')
-    plt.ylabel('Speed (mm/s)')
-    plt.savefig('/mnt/parscratch/users/eia19od/violins/Speed_colored.png')
+    plt.ylabel('Focus')
+    plt.savefig('/mnt/parscratch/users/eia19od/violins/Focus_colored.png')
 
     # Ensure 'Keyhole' is a boolean for plotting
     final_merged_data['Keyhole'] = final_merged_data['Keyhole'].astype(bool)
