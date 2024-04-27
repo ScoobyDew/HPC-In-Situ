@@ -34,7 +34,7 @@ def read_and_plot(directory):
     for quadrant in ['North', 'South']:
         for df in quadrant_data[quadrant]:
             # Filter 'bin_mid' to be less than 7500
-            df = df[df['bin_mid'] < 7500]
+            df = df[df['bin_mid'] < 8000]
 
             # Divide 'bin_mid' by 1000
             df['bin_mid'] = df['bin_mid'] / 1000
@@ -50,7 +50,7 @@ def read_and_plot(directory):
     # Plot East and West with normalization
     for quadrant in ['East', 'West']:
         for df in quadrant_data[quadrant]:
-            df = df[df['bin_mid'] < 7500]
+            df = df[df['bin_mid'] < 8000]
 
             # Divide 'bin_mid' by 1000
             df['bin_mid'] = df['bin_mid'] / 1000
