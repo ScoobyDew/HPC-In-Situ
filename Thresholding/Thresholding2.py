@@ -149,5 +149,25 @@ def main():
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
+    # Assuming `computed_data` contains your DataFrame after necessary data processing steps.
+    def plot_combined_bargraph(data):
+        plt.figure(figsize=(12, 8))
+
+        # Plotting the data
+        # Assuming 'RegionLabel' can be used as the categorical separation for x-axis
+        data = data[data['RegionLabel'].isin(['1', '2', '3', 'Background'])]  # Ensuring only specified labels are used
+        # Melting the data to transform it from wide format to long format for seaborn's easy handling
+        melted_data = data.melt(id_vars=['RegionLabel'], value_vars=['Power (W)', 'Speed (mm/s)', 'Focus'],
+                                var_name='Parameter', value_name='Value')
+
+        # Creating the bar plot
+        sns.barplot(x='RegionLabel', y='Value', hue='Parameter', data=melted_data)
+        plt.title('Comparison of Power, Speed, and Focus by Region Label')
+        plt.xlabel('Region Label')
+        plt.ylabel('Values')
+        plt.legend(title='Parameter')
+        plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Combined_Bar_Graph.png')
+        plt.close()
+
 if __name__ == "__main__":
     main()
