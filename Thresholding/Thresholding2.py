@@ -30,27 +30,18 @@ def plot_violin(data, x_col, y_col, title, filename, palette=None):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
 
-def plot_bar(data, x_col, y_col, title, filename, ci=None, palette=None):
-    """
-    Function to create a bar plot for specified columns and save it as an image.
 
-    Args:
-    data (DataFrame): The data to plot.
-    x_col (str): The column name for the x-axis.
-    y_col (str): The column name for the y-axis.
-    title (str): Title of the plot.
-    filename (str): Path to save the plot image.
-    estimator (function): Aggregation function (e.g., numpy.mean).
-    ci (float, optional): Confidence interval size for error bars.
-    palette (dict, optional): A dictionary mapping categories to colors.
+def plot_unique_power_bars(data, filename):
+    """
+    Function to create a bar plot with unique bars for each unique power value per region label.
     """
     plt.figure(figsize=(12, 8))
-    sns.barplot(x=x_col, y=y_col, data=data, ci=ci, palette=palette)
-    plt.title(title)
-    plt.xlabel(x_col)
-    plt.ylabel(y_col)
+    sns.barplot(x='RegionLabel', y='Power (W)', data=data)
+    plt.title('Unique Power Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Power (W)')
     plt.savefig(filename)
-    plt.close()  # Close the plot to free up memory
+    plt.close()
 
 def main():
     time_start = time.time()
@@ -100,7 +91,6 @@ def main():
     # Make 'RegionLabel' a string for consistency
     final_merged_data['RegionLabel'] = final_merged_data['RegionLabel'].astype(str)
 
-    # if region label is neither 1, 2, or 3, set it to 'Background'
 
 
 
@@ -164,12 +154,6 @@ def main():
     plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Keyhole_Counts.png')
     plt.close()
 
-    # Plotting bar plot for 'Power (W)' by 'RegionLabel'
-    logging.info("Plotting bar plot for Power (W) by RegionLabel.")
-    plot_bar(computed_data, 'RegionLabel', 'Power (W)', 'Bar Plot of Power by Region Label',
-             '/mnt/parscratch/users/eia19od/bargraphs/Power_Bar.png')
-
-
 
     logging.info("Colored violin plots created and saved successfully.")
 
@@ -179,7 +163,41 @@ def main():
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
+def main2():
+    main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
+    labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
+    parameters_path = '/mnt/parscratch/users/eia19od/merged_data.xlsx'
 
+    logging.info("Reading the main and labeled datasets using Dask.")
+    main_data = dd.read_parquet(main_data_path)
+    main_data = main_data.sample(frac=0.01)
+    labeled_data = dd.read_csv(labeled_data_path)
+
+    main_data['mp_length'] = main_data['mp_length'].astype(int)
+    main_data['mp_width'] = main_data['mp_width'].astype(int)
+    labeled_data['mp_length'] = labeled_data['mp_length'].astype(int)
+    labeled_data['mp_width'] = labeled_data['mp_width'].astype(int)
+
+    logging.info("Merging main data with labeled data.")
+    merged_data = dd.merge(main_data, labeled_data, on=['mp_width', 'mp_length'], how='left')
+
+    processing_parameters = pd.read_excel(parameters_path)
+    processing_parameters['Part Number'] = processing_parameters['Part Number'].astype(str)
+    processing_parameters = dd.from_pandas(processing_parameters, npartitions=2)
+
+    merged_data['Part Number'] = merged_data['Part Number'].astype(str)
+    final_merged_data = dd.merge(merged_data, processing_parameters, on='Part Number', how='left')
+    logging.info(f"Columns in final merged data: {final_merged_data.columns}")
+
+    final_merged_data = final_merged_data[final_merged_data['RegionLabel'] != 0]
+    final_merged_data['RegionLabel'] = final_merged_data['RegionLabel'].astype(str)
+
+    computed_data = final_merged_data.compute()
+
+    # Adjust this plot call to match your needs
+    plot_unique_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Power_Bar.png')
+
+    logging.info(f"Total processing time seconds.")
 
 if __name__ == "__main__":
-    main()
+    main2()
