@@ -30,7 +30,7 @@ def plot_violin(data, x_col, y_col, title, filename, palette=None):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
 
-def plot_bar(data, x_col, y_col, title, filename, estimator, ci=None, palette=None):
+def plot_bar(data, x_col, y_col, title, filename, estimator=np.mean, ci=None, palette=None):
     """
     Function to create a bar plot for specified columns and save it as an image.
 
@@ -51,6 +51,7 @@ def plot_bar(data, x_col, y_col, title, filename, estimator, ci=None, palette=No
     plt.ylabel(y_col)
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
+
 
 def main():
     time_start = time.time()
@@ -166,10 +167,10 @@ def main():
 
     # Plotting bar plot for 'Power (W)' by 'RegionLabel'
     logging.info("Plotting bar plot for Power (W) by RegionLabel.")
-    plot_bar(computed_data, 'RegionLabel', 'Power (W)', 'Bar Plot of Power by Region Label',
-             '/mnt/parscratch/users/eia19od/bargraphs/Power_Bar.png', estimator=pd.np.sum, ci='sd')
-
-
+    # Plotting bar graph of Normalised Enthalpy by Region Label without splitting by Keyhole
+    logging.info("Plotting the bar plot of Normalized Enthalpy by Region Label.")
+    plot_bar(computed_data, 'RegionLabel', 'Normalised Enthalpy', 'Bar Plot of Normalized Enthalpy by Region Label',
+             '/mnt/parscratch/users/eia19od/violins/NormH.png', np.sum, ci=95, palette=palette)
 
     logging.info("Colored violin plots created and saved successfully.")
 
