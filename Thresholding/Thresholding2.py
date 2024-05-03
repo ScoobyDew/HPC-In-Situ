@@ -30,7 +30,7 @@ def plot_violin(data, x_col, y_col, title, filename, palette=None):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
 
-def plot_bar(data, x_col, y_col, title, filename, estimator, ci=None, palette=None):
+def plot_bar(data, x_col, y_col, title, filename, ci=None, palette=None):
     """
     Function to create a bar plot for specified columns and save it as an image.
 
@@ -45,7 +45,7 @@ def plot_bar(data, x_col, y_col, title, filename, estimator, ci=None, palette=No
     palette (dict, optional): A dictionary mapping categories to colors.
     """
     plt.figure(figsize=(12, 8))
-    sns.barplot(x=x_col, y=y_col, data=data, estimator=estimator, ci=ci, palette=palette)
+    sns.barplot(x=x_col, y=y_col, data=data, ci=ci, palette=palette)
     plt.title(title)
     plt.xlabel(x_col)
     plt.ylabel(y_col)
