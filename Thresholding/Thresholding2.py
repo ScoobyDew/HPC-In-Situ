@@ -167,7 +167,7 @@ def main():
     # Plotting bar plot for 'Power (W)' by 'RegionLabel'
     logging.info("Plotting bar plot for Power (W) by RegionLabel.")
     plot_bar(computed_data, 'RegionLabel', 'Power (W)', 'Bar Plot of Power by Region Label',
-             '/mnt/parscratch/users/eia19od/bargraphs/Power_Bar.png', estimator=pd.np.sum, ci='sd')
+             '/mnt/parscratch/users/eia19od/bargraphs/Power_Bar.png')
 
 
 
