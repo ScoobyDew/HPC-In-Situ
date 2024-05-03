@@ -29,6 +29,29 @@ def plot_violin(data, x_col, y_col, title, filename, palette=None):
     plt.ylabel(y_col)
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
+
+def plot_bar(data, x_col, y_col, title, filename, estimator, ci=None, palette=None):
+    """
+    Function to create a bar plot for specified columns and save it as an image.
+
+    Args:
+    data (DataFrame): The data to plot.
+    x_col (str): The column name for the x-axis.
+    y_col (str): The column name for the y-axis.
+    title (str): Title of the plot.
+    filename (str): Path to save the plot image.
+    estimator (function): Aggregation function (e.g., numpy.mean).
+    ci (float, optional): Confidence interval size for error bars.
+    palette (dict, optional): A dictionary mapping categories to colors.
+    """
+    plt.figure(figsize=(12, 8))
+    sns.barplot(x=x_col, y=y_col, data=data, estimator=estimator, ci=ci, palette=palette)
+    plt.title(title)
+    plt.xlabel(x_col)
+    plt.ylabel(y_col)
+    plt.savefig(filename)
+    plt.close()  # Close the plot to free up memory
+
 def main():
     time_start = time.time()
 
@@ -141,6 +164,13 @@ def main():
     plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Keyhole_Counts.png')
     plt.close()
 
+    # Plotting bar plot for 'Power (W)' by 'RegionLabel'
+    logging.info("Plotting bar plot for Power (W) by RegionLabel.")
+    plot_bar(computed_data, 'RegionLabel', 'Power (W)', 'Bar Plot of Power by Region Label',
+             '/mnt/parscratch/users/eia19od/bargraphs/Power_Bar.png', estimator=pd.np.sum, ci='sd')
+
+
+
     logging.info("Colored violin plots created and saved successfully.")
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
@@ -149,25 +179,7 @@ def main():
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
-    # Assuming `computed_data` contains your DataFrame after necessary data processing steps.
-    def plot_combined_bargraph(data):
-        plt.figure(figsize=(12, 8))
 
-        # Plotting the data
-        # Assuming 'RegionLabel' can be used as the categorical separation for x-axis
-        data = data[data['RegionLabel'].isin(['1', '2', '3', 'Background'])]  # Ensuring only specified labels are used
-        # Melting the data to transform it from wide format to long format for seaborn's easy handling
-        melted_data = data.melt(id_vars=['RegionLabel'], value_vars=['Power (W)', 'Speed (mm/s)', 'Focus'],
-                                var_name='Parameter', value_name='Value')
-
-        # Creating the bar plot
-        sns.barplot(x='RegionLabel', y='Value', hue='Parameter', data=melted_data)
-        plt.title('Comparison of Power, Speed, and Focus by Region Label')
-        plt.xlabel('Region Label')
-        plt.ylabel('Values')
-        plt.legend(title='Parameter')
-        plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Combined_Bar_Graph.png')
-        plt.close()
 
 if __name__ == "__main__":
     main()
