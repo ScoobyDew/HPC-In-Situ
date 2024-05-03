@@ -43,6 +43,22 @@ def plot_unique_power_bars(data, filename):
     plt.savefig(filename)
     plt.close()
 
+def plot_grouped_power_bars(data, filename):
+    """
+    Function to create a grouped bar plot with bars for each unique power value per region label.
+    """
+    # Count frequencies for each power value in each region
+    data['Power (W)'] = data['Power (W)'].astype(str)  # Convert to string for counting
+    data_freq = data.groupby(['RegionLabel', 'Power (W)']).size().reset_index(name='Frequency')
+
+    plt.figure(figsize=(12, 8))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='Power (W)', data=data_freq)
+    plt.title('Frequency of Power Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Frequency')
+    plt.savefig(filename)
+    plt.close()
+
 def main():
     time_start = time.time()
 
@@ -195,7 +211,7 @@ def main2():
     computed_data = final_merged_data.compute()
 
     # Adjust this plot call to match your needs
-    plot_unique_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Power_Bar.png')
+    plot_grouped_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Power_Bar.png')
 
     logging.info(f"Total processing time seconds.")
 
