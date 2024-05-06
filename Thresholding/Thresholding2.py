@@ -267,8 +267,70 @@ def plot_normalized_speed_bars(data, filename):
     sns.barplot(x='RegionLabel', y='Normalized Frequency', hue='Speed (mm/s)', data=data_freq, palette=palette)
     plt.title('Normalized Frequency of Speed Values by Region Label')
     plt.xlabel('Region Label')
-    plt.ylabel('Normalized Frequency')
+    plt.ylabel('Proportion (by group)')
     plt.legend(title='Speed (mm/s)', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+def plot_normalized_focus_bars(data, filename):
+    """
+    Function to create a grouped bar plot with normalized bars for each unique focus value per region label,
+    scaled by the total counts per region and colored using the cividis colormap.
+    """
+    # Ensure Focus is numeric and drop any rows where it's missing
+    data['Focus'] = pd.to_numeric(data['Focus'], errors='coerce')
+    data = data.dropna(subset=['Focus'])
+
+    # Count frequencies for each focus value in each region
+    data_freq = data.groupby(['RegionLabel', 'Focus']).size().reset_index(name='Frequency')
+
+    # Calculate total counts per region to normalize
+    total_counts_per_region = data_freq.groupby('RegionLabel')['Frequency'].transform('sum')
+    data_freq['Normalized Frequency'] = data_freq['Frequency'] / total_counts_per_region
+
+    # Sort data for better visualization
+    data_freq = data_freq.sort_values(by=['RegionLabel', 'Focus'])
+
+    plt.figure(figsize=(12, 8))
+    # Assign colors from the cividis colormap based on unique Focus values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Focus'].unique()))
+    sns.barplot(x='RegionLabel', y='Normalized Frequency', hue='Focus', data=data_freq, palette=palette)
+    plt.title('Normalized Frequency of Focus Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Proportion (by group)')
+    plt.legend(title='Focus', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+def plot_normalized_power_bars(data, filename):
+    """
+    Function to create a grouped bar plot with normalized bars for each unique power value per region label,
+    scaled by the total counts per region and colored using the cividis colormap.
+    """
+    # Ensure Power (W) is numeric and drop any rows where it's missing
+    data['Power (W)'] = pd.to_numeric(data['Power (W)'], errors='coerce')
+    data = data.dropna(subset=['Power (W)'])
+
+    # Count frequencies for each power value in each region
+    data_freq = data.groupby(['RegionLabel', 'Power (W)']).size().reset_index(name='Frequency')
+
+    # Calculate total counts per region to normalize
+    total_counts_per_region = data_freq.groupby('RegionLabel')['Frequency'].transform('sum')
+    data_freq['Normalized Frequency'] = data_freq['Frequency'] / total_counts_per_region
+
+    # Sort data for better visualization
+    data_freq = data_freq.sort_values(by=['RegionLabel', 'Power (W)'])
+
+    plt.figure(figsize=(12, 8))
+    # Assign colors from the cividis colormap based on unique Power values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Power (W)'].unique()))
+    sns.barplot(x='RegionLabel', y='Normalized Frequency', hue='Power (W)', data=data_freq, palette=palette)
+    plt.title('Normalized Frequency of Power Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Proportion (by group)')
+    plt.legend(title='Power (W)', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     plt.savefig(filename)
     plt.close()
@@ -310,6 +372,9 @@ def main2():
     plot_grouped_focus_bars(computed_data[computed_data['Focus'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Focus_Bar.png')
     plot_grouped_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Speed_Bar.png')
     plot_normalized_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Speed_Bar.png')
+    plot_normalized_focus_bars(computed_data[computed_data['Focus'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Focus_Bar.png')
+    plot_normalized_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Power_Bar.png')
+
 
     logging.info(f"Total processing time seconds.")
 
