@@ -335,6 +335,26 @@ def plot_normalized_power_bars(data, filename):
     plt.savefig(filename)
     plt.close()
 
+# Plot violin plots for each of the regions and E*0
+def plot_violin(data, filename):
+    """
+    Function to create a violin plot for specified columns and save it as an image.
+
+    Args:
+    data (DataFrame): The data to plot.
+    x_col (str): The column name for the x-axis.
+    y_col (str): The column name for the y-axis.
+    title (str): Title of the plot.
+    filename (str): Path to save the plot image.
+    palette (dict, optional): A dictionary mapping categories to colors.
+    """
+    plt.figure(figsize=(12, 8))
+    sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=data)
+    plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Normalised Enthalpy')
+    plt.savefig(filename)
+    plt.close()  # Close the plot to free up memory
 
 def main2():
     main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
@@ -374,6 +394,7 @@ def main2():
     plot_normalized_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Speed_Bar.png')
     plot_normalized_focus_bars(computed_data[computed_data['Focus'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Focus_Bar.png')
     plot_normalized_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Power_Bar.png')
+    plot_violin(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored.png')
 
 
     logging.info(f"Total processing time seconds.")
