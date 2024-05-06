@@ -64,6 +64,59 @@ def plot_grouped_power_bars(data, filename):
     plt.xlabel('Region Label')
     plt.ylabel('Frequency')
     plt.legend(title='Power (W)', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+
+def plot_grouped_focus_bars(data, filename):
+    """
+    Function to create a grouped bar plot with bars for each unique focus value per region label,
+    sorted in ascending order and colored using the cividis colormap.
+    """
+    # Ensure Focus is numeric and drop any rows where it's missing
+    data['Focus'] = pd.to_numeric(data['Focus'], errors='coerce')
+    data = data.dropna(subset=['Focus'])
+
+    # Count frequencies for each focus value in each region, sorted by Focus
+    data_freq = data.groupby(['RegionLabel', 'Focus']).size().reset_index(name='Frequency')
+    data_freq = data_freq.sort_values(by='Focus')
+
+    plt.figure(figsize=(12, 8))
+    # Dynamically assign colors from the cividis colormap based on unique Focus values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Focus'].unique()))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='Focus', data=data_freq, palette=palette)
+    plt.title('Frequency of Focus Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Frequency')
+    plt.legend(title='Focus', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+
+def plot_grouped_speed_bars(data, filename):
+    """
+    Function to create a grouped bar plot with bars for each unique speed value per region label,
+    sorted in ascending order and colored using the cividis colormap.
+    """
+    # Ensure Speed (mm/s) is numeric and drop any rows where it's missing
+    data['Speed (mm/s)'] = pd.to_numeric(data['Speed (mm/s)'], errors='coerce')
+    data = data.dropna(subset=['Speed (mm/s)'])
+
+    # Count frequencies for each speed value in each region, sorted by Speed
+    data_freq = data.groupby(['RegionLabel', 'Speed (mm/s)']).size().reset_index(name='Frequency')
+    data_freq = data_freq.sort_values(by='Speed (mm/s)')
+
+    plt.figure(figsize=(12, 8))
+    # Assign colors from the cividis colormap based on unique Speed values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Speed (mm/s)'].unique()))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='Speed (mm/s)', data=data_freq, palette=palette)
+    plt.title('Frequency of Speed Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Frequency')
+    plt.legend(title='Speed (mm/s)', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
     plt.savefig(filename)
     plt.close()
 
@@ -221,6 +274,8 @@ def main2():
 
     # Adjust this plot call to match your needs
     plot_grouped_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Power_Bar.png')
+    plot_grouped_focus_bars(computed_data[computed_data['Focus'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Focus_Bar.png')
+    plot_grouped_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Speed_Bar.png')
 
     logging.info(f"Total processing time seconds.")
 
