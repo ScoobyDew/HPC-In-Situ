@@ -241,6 +241,39 @@ def main():
 
     logging.info(f"Total processing time: {time.time() - time_start} seconds.")
 
+
+def plot_normalized_speed_bars(data, filename):
+    """
+    Function to create a grouped bar plot with normalized bars for each unique speed value per region label,
+    scaled by the total counts per region and colored using the cividis colormap.
+    """
+    # Ensure Speed (mm/s) is numeric and drop any rows where it's missing
+    data['Speed (mm/s)'] = pd.to_numeric(data['Speed (mm/s)'], errors='coerce')
+    data = data.dropna(subset=['Speed (mm/s)'])
+
+    # Count frequencies for each speed value in each region
+    data_freq = data.groupby(['RegionLabel', 'Speed (mm/s)']).size().reset_index(name='Frequency')
+
+    # Calculate total counts per region to normalize
+    total_counts_per_region = data_freq.groupby('RegionLabel')['Frequency'].transform('sum')
+    data_freq['Normalized Frequency'] = data_freq['Frequency'] / total_counts_per_region
+
+    # Sort data for better visualization
+    data_freq = data_freq.sort_values(by=['RegionLabel', 'Speed (mm/s)'])
+
+    plt.figure(figsize=(12, 8))
+    # Assign colors from the cividis colormap based on unique Speed values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Speed (mm/s)'].unique()))
+    sns.barplot(x='RegionLabel', y='Normalized Frequency', hue='Speed (mm/s)', data=data_freq, palette=palette)
+    plt.title('Normalized Frequency of Speed Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Normalized Frequency')
+    plt.legend(title='Speed (mm/s)', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+
 def main2():
     main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
     labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
@@ -276,6 +309,7 @@ def main2():
     plot_grouped_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Power_Bar.png')
     plot_grouped_focus_bars(computed_data[computed_data['Focus'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Focus_Bar.png')
     plot_grouped_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_Speed_Bar.png')
+    plot_normalized_speed_bars(computed_data[computed_data['Speed (mm/s)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Speed_Bar.png')
 
     logging.info(f"Total processing time seconds.")
 
