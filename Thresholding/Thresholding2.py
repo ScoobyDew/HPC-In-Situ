@@ -43,21 +43,30 @@ def plot_unique_power_bars(data, filename):
     plt.savefig(filename)
     plt.close()
 
+
 def plot_grouped_power_bars(data, filename):
     """
-    Function to create a grouped bar plot with bars for each unique power value per region label.
+    Function to create a grouped bar plot with bars for each unique power value per region label,
+    sorted in ascending order and colored using the cividis colormap.
     """
-    # Count frequencies for each power value in each region
-    data['Power (W)'] = data['Power (W)'].astype(str)  # Convert to string for counting
+    # Ensure Power (W) is numeric and drop any rows where it's missing
+    data['Power (W)'] = pd.to_numeric(data['Power (W)'], errors='coerce')
+    data = data.dropna(subset=['Power (W)'])
+
+    # Count frequencies for each power value in each region, sorted by Power
     data_freq = data.groupby(['RegionLabel', 'Power (W)']).size().reset_index(name='Frequency')
+    data_freq = data_freq.sort_values(by='Power (W)')
 
     plt.figure(figsize=(12, 8))
-    sns.barplot(x='RegionLabel', y='Frequency', hue='Power (W)', data=data_freq)
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['Power (W)'].unique()))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='Power (W)', data=data_freq, palette=palette)
     plt.title('Frequency of Power Values by Region Label')
     plt.xlabel('Region Label')
     plt.ylabel('Frequency')
+    plt.legend(title='Power (W)', bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.savefig(filename)
     plt.close()
+
 
 def main():
     time_start = time.time()
