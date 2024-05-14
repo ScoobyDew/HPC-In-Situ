@@ -121,6 +121,33 @@ def plot_grouped_speed_bars(data, filename):
     plt.close()
 
 
+# Create bar plots for PV for each region
+def plot_grouped_pv_bars(data, filename):
+    """
+    Function to create a grouped bar plot with bars for each unique PV value per region label,
+    sorted in ascending order and colored using the cividis colormap.
+    """
+    # Ensure PV is numeric and drop any rows where it's missing
+    data['PV'] = pd.to_numeric(data['PV'], errors='coerce')
+    data = data.dropna(subset=['PV'])
+
+    # Count frequencies for each PV value in each region, sorted by PV
+    data_freq = data.groupby(['RegionLabel', 'PV']).size().reset_index(name='Frequency')
+    data_freq = data_freq.sort_values(by='PV')
+
+    plt.figure(figsize=(12, 8))
+    # Dynamically assign colors from the cividis colormap based on unique PV values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['PV'].unique()))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='PV', data=data_freq, palette=palette)
+    plt.title('Frequency of PV Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Frequency')
+    plt.legend(title='PV', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+
 def main():
     time_start = time.time()
 
@@ -169,6 +196,10 @@ def main():
     # Make 'RegionLabel' a string for consistency
     final_merged_data['RegionLabel'] = final_merged_data['RegionLabel'].astype(str)
 
+    # Create feature P/V
+    logging.info("Creating feature P/V.")
+    final_merged_data['PV'] = final_merged_data['Power (W)'] / final_merged_data['Speed (mm/s)']
+    logging.info("P/V feature created.")
 
 
 
@@ -232,6 +263,10 @@ def main():
     plt.savefig('/mnt/parscratch/users/eia19od/bargraphs/Keyhole_Counts.png')
     plt.close()
 
+    # Call PV function
+    logging.info("Creating grouped bar plot for P/V.")
+    plot_grouped_pv_bars(computed_data[computed_data['PV'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Unique_PV_Bar.png')
+    logging.info("Grouped bar plot for P/V created and saved successfully.")
 
     logging.info("Colored violin plots created and saved successfully.")
 
