@@ -370,6 +370,64 @@ def plot_normalized_power_bars(data, filename):
     plt.savefig(filename)
     plt.close()
 
+def plot_grouped_pv_bars(data, filename):
+    """
+    Function to create a grouped bar plot with bars for each unique PV value per region label,
+    sorted in ascending order and colored using the cividis colormap.
+    """
+    # Ensure PV is numeric and drop any rows where it's missing
+    data['PV'] = pd.to_numeric(data['PV'], errors='coerce')
+    data = data.dropna(subset=['PV'])
+
+    # Count frequencies for each PV value in each region, sorted by PV
+    data_freq = data.groupby(['RegionLabel', 'PV']).size().reset_index(name='Frequency')
+    data_freq = data_freq.sort_values(by='PV')
+
+    plt.figure(figsize=(12, 8))
+    # Dynamically assign colors from the cividis colormap based on unique PV values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['PV'].unique()))
+    sns.barplot(x='RegionLabel', y='Frequency', hue='PV', data=data_freq, palette=palette)
+    plt.title('Frequency of PV Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Frequency')
+    plt.legend(title='PV', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
+
+# Plot normalised PV
+def plot_normalized_pv_bars(data, filename):
+    """
+    Function to create a grouped bar plot with normalized bars for each unique PV value per region label,
+    scaled by the total counts per region and colored using the cividis colormap.
+    """
+    # Ensure PV is numeric and drop any rows where it's missing
+    data['PV'] = pd.to_numeric(data['PV'], errors='coerce')
+    data = data.dropna(subset=['PV'])
+
+    # Count frequencies for each PV value in each region
+    data_freq = data.groupby(['RegionLabel', 'PV']).size().reset_index(name='Frequency')
+
+    # Calculate total counts per region to normalize
+    total_counts_per_region = data_freq.groupby('RegionLabel')['Frequency'].transform('sum')
+    data_freq['Normalized Frequency'] = data_freq['Frequency'] / total_counts_per_region
+
+    # Sort data for better visualization
+    data_freq = data_freq.sort_values(by=['RegionLabel', 'PV'])
+
+    plt.figure(figsize=(12, 8))
+    # Assign colors from the cividis colormap based on unique PV values
+    palette = sns.color_palette("cividis", n_colors=len(data_freq['PV'].unique()))
+    sns.barplot(x='RegionLabel', y='Normalized Frequency', hue='PV', data=data_freq, palette=palette)
+    plt.title('Normalized Frequency of PV Values by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Proportion (by group)')
+    plt.legend(title='PV', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(filename)
+    plt.close()
+
 # Plot violin plots for each of the regions and E*0
 def plot_violin(data, filename):
     """
@@ -392,6 +450,7 @@ def plot_violin(data, filename):
     plt.close()  # Close the plot to free up memory
 
 def main2():
+    start_time = time.time()
     main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
     labeled_data_path = '/mnt/parscratch/users/eia19od/labelled.csv'
     parameters_path = '/mnt/parscratch/users/eia19od/merged_data.xlsx'
@@ -431,8 +490,11 @@ def main2():
     plot_normalized_power_bars(computed_data[computed_data['Power (W)'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_Power_Bar.png')
     plot_violin(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored.png')
 
+    plot_normalized_pv_bars(computed_data[computed_data['PV'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_PV_Bar.png')
 
-    logging.info(f"Total processing time seconds.")
+    end_time = time.time()
+    total_time = end_time - start_time
+    logging.info(f"Total processing time {total_time} seconds.")
 
 if __name__ == "__main__":
     main2()
