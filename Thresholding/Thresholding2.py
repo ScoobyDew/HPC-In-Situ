@@ -479,6 +479,9 @@ def main2():
     final_merged_data = final_merged_data[final_merged_data['RegionLabel'] != 0]
     final_merged_data['RegionLabel'] = final_merged_data['RegionLabel'].astype(str)
 
+    logging.info("Creating feature P/V.")
+    final_merged_data['PV'] = final_merged_data['Power (W)'] / final_merged_data['Speed (mm/s)']
+    logging.info("P/V feature created.")
     computed_data = final_merged_data.compute()
 
     # Adjust this plot call to match your needs
