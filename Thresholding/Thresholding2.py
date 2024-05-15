@@ -495,6 +495,11 @@ def main2():
 
     plot_normalized_pv_bars(computed_data[computed_data['PV'].notnull()], '/mnt/parscratch/users/eia19od/bargraphs/Normalized_PV_Bar.png')
 
+    # Plot violin plots for Normalised Enthalpy
+    logging.info("Plotting the violin plot with custom colors.")
+    plot_violin(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored.png')
+    logging.info("Violin plot created and saved successfully.")
+
     end_time = time.time()
     total_time = end_time - start_time
     logging.info(f"Total processing time {total_time} seconds.")
