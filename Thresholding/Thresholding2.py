@@ -445,7 +445,7 @@ def plot_violin(data, filename):
     sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=data)
     plt.title('Violin Plot of Normalized Enthalpy by Region Label')
     plt.xlabel('Region Label')
-    plt.ylabel(r'$\frac{\Delta H}{d_h}$')
+    plt.ylabel(r'$\frac{\Delta H}{h_s}$')
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
 
