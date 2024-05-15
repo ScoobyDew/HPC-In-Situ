@@ -527,7 +527,7 @@ def main2():
 
     # Plot violin plots for Normalised Enthalpy
     logging.info("Plotting the violin plot with custom colors.")
-    plot_violin_new(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored_new.png')
+    plot_violin(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored_new.png')
     logging.info("Violin plot created and saved successfully.")
 
     end_time = time.time()
