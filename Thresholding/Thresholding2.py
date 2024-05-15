@@ -449,6 +449,36 @@ def plot_violin(data, filename):
     plt.savefig(filename)
     plt.close()  # Close the plot to free up memory
 
+
+def plot_violin_new(data, filename):
+    """
+    Function to create a violin plot for specified columns and save it as an image.
+
+    Args:
+    data (DataFrame): The data to plot.
+    filename (str): Path to save the plot image.
+    """
+    # Filter the data for regions 1 and 2
+    filtered_data = data[data['RegionLabel'].isin([1, 2])]
+
+    # Map region labels to A and B
+    label_mapping = {1: 'A', 2: 'B'}
+    filtered_data['RegionLabel'] = filtered_data['RegionLabel'].map(label_mapping)
+
+    # Create the violin plot
+    plt.figure(figsize=(12, 8))
+    sns.violinplot(x='RegionLabel', y='Normalised Enthalpy', data=filtered_data)
+    plt.title('Violin Plot of Normalized Enthalpy by Region Label')
+    plt.xlabel('Region Label')
+    plt.ylabel('Normalised Enthalpy')
+    plt.savefig(filename)
+    plt.close()  # Close the plot to free up memory
+
+# Example usage
+# df = pd.DataFrame({'RegionLabel': [1, 2, 3, 1, 2, 3], 'Normalised Enthalpy': [0.5, 0.6, 0.7, 0.8, 0.9, 1.0]})
+# plot_violin(df, 'violin_plot.png')
+
+
 def main2():
     start_time = time.time()
     main_data_path = '/mnt/parscratch/users/eia19od/combined_data.parquet'
@@ -497,7 +527,7 @@ def main2():
 
     # Plot violin plots for Normalised Enthalpy
     logging.info("Plotting the violin plot with custom colors.")
-    plot_violin(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored_new.png')
+    plot_violin_new(computed_data, '/mnt/parscratch/users/eia19od/violins/NormH_colored_new.png')
     logging.info("Violin plot created and saved successfully.")
 
     end_time = time.time()
